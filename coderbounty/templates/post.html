@@ -162,8 +162,8 @@
                                     <div class="value">
                                         <input type="text" id="title" name="title"
                                             value="{{form.title.value|default:''}}" />
-                                        {% for error_field,error_value in errors.items %} {% if error_field == 'title'
-                                        %} {{ error_value }} {% endif %} {% endfor %}
+                                        {% for error_field,error_value in errors.items %} 
+                                        {% if error_field == 'title' %} {{ error_value }} {% endif %} {% endfor %}
                                     </div>
                                 </div>
                                 <!-- -->
@@ -172,8 +172,8 @@
                                     <div class="vlaue">
                                         <textarea id="content"
                                             name="content">{{form.content.value|default:''}}</textarea>
-                                        {% for error_field,error_value in errors.items %} {% if error_field == 'content'
-                                        %} {{ error_value }} {% endif %} {% endfor %}
+                                        {% for error_field,error_value in errors.items %} 
+                                        {% if error_field == 'content' %} {{ error_value }} {% endif %} {% endfor %}
                                     </div>
                                 </div>
                                 <!-- -->
@@ -195,8 +195,8 @@
                                         <input type="text" id="price" name="price" pattern="^[0-9]*$" value="20" />
                                         <div id="slider"></div>
 
-                                        {% for error_field,error_value in bounty_errors.items %} {{ error_value }} {%
-                                        endfor %}
+                                        {% for error_field,error_value in bounty_errors.items %} {{ error_value }} 
+                                        {% endfor %}
 
                                     </div>
                                     <div id="fee">Coderbounty's fee: $<span id="fee_amt">2</span></div>
