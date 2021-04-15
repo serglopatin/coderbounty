@@ -228,6 +228,9 @@ WHITENOISE_MAX_AGE = 432000
 
 LOGIN_REDIRECT_URL = "/profile/"
 
+ACTSTREAM_SETTINGS = {
+    "USE_JSONFIELD": False,
+}
 
 LOGGING = {
     "version": 1,
