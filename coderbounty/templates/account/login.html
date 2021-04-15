@@ -16,14 +16,15 @@
 
                 <div class="frame-content">
                     <h1 class="titlebar-paper">
-                        <span>{% trans "Sign In" %}</span></h1>
+                        <span>{% trans "Sign In" %}</span>
+                    </h1>
 
                     <div class="grid login-grid">
 
-                    {% if socialaccount_providers %}
+                        {% if socialaccount_providers %}
                         <p class="login-intro">{% blocktrans with site.name as site_name %}Please sign in with one
-                        of your existing third party accounts. Or, <a href="{{ signup_url }}">sign up</a>
-                        for a {{site_name}} account and sign in below:{% endblocktrans %}</p>
+                            of your existing third party accounts. Or, <a href="{{ signup_url }}">sign up</a>
+                            for a {{site_name}} account and sign in below:{% endblocktrans %}</p>
 
                         <div class="socialaccount_ballot">
                             <ul class="socialaccount_providers">
@@ -36,8 +37,9 @@
 
                         {% else %}
                         <p>{% blocktrans %}If you have not created an account yet, then please
-                        <a href="{{ signup_url }}">sign up</a> first.{% endblocktrans %}</p>
-{% endif %}
+                            <a href="{{ signup_url }}">sign up</a> first.{% endblocktrans %}
+                        </p>
+                        {% endif %}
 
                         <form class="form form-login" method="POST" action="{% url 'account_login' %}">
                             {% csrf_token %}
@@ -45,9 +47,10 @@
                             {% if redirect_field_value %}
                             <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
                             {% endif %}
-                            <a class="button secondaryAction" href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a>
+                            <a class="button secondaryAction" href="{% url 'account_reset_password' %}">
+                                {% trans "Forgot Password?" %}</a>
                             <div class="btn-login-wrapper">
-                                <button class="primaryAction btn-login" type="submit">{% trans "Sign In" %}</button>
+                                <button class="primaryAction btn-login" type="submit" id="log_in">{% trans "Sign In" %}</button>
                             </div>
                         </form>
                     </div>
@@ -56,5 +59,5 @@
             </section>
         </div>
     </div>
-<div>
-{% endblock %}
+    <div>
+        {% endblock %}

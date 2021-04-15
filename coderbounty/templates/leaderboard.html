@@ -1,83 +1,90 @@
 {% extends 'base.html' %}
-{% load staticfiles %}
+{% load static %}
 {% load i18n %}
 {% load socialaccount %}
 
 
 {% block content %}
 
-    <!-- Section Latest -->
-    <div class="section-latest wrapper-section">
-        <div class="wrapper-global grid">
-            <section class="col-14 activity">
-                <!--frame -->
-                <div class="frame frame-light">
-                    <div class="frame-content">
-                        <h2 class="titlebar"><span class="ribbon ribbon-normal ribbon-04 ribbon-brown">Global Leaderboard</span></h2>
-                        <!-- table-list-activity -->
-                        <table class="table-list table-list-activity">
-                            {% for user in object_list %}
-                            <tbody>
-                                <tr>
-                                 <td class="status">
-                                        #{{object_list.start_index|add:forloop.counter0}}
-                                    </td>
-                                    <td class="thumb">
-                                        <a href="/profile/{{ user.username }}" class="img-holder"><img src="{{ user.userprofile.avatar }}" alt="" /></a></td>
-                                    <td class="text">
-                                        <p><a href="/profile/{{user.username}}">{{user.username}}</a> </p>
-                                        <time class="time">Last Login: {{ user.last_login|date:"m/d/Y" }}</time></td>
-                                    <td class="status">
-                                       ${{user.userprofile.bounties_won|floatformat|default:"0"}}
-                                    </td>
-                                </tr>
-                                
-                            </tbody>
+<!-- Section Latest -->
+<div class="section-latest wrapper-section">
+    <div class="wrapper-global grid">
+        <section class="col-14 activity">
+            <!--frame -->
+            <div class="frame frame-light">
+                <div class="frame-content">
+                    <h2 class="titlebar"><span class="ribbon ribbon-normal ribbon-04 ribbon-brown">Global
+                            Leaderboard</span></h2>
+                    <!-- table-list-activity -->
+                    <table class="table-list table-list-activity">
+                        {% for user in object_list %}
+                        <tbody>
+                            <tr>
+                                <td class="status">
+                                    #{{object_list.start_index|add:forloop.counter0}}
+                                </td>
+                                <td class="thumb">
+                                    <a href="/profile/{{ user.username }}" class="img-holder"><img
+                                            src="{{ user.userprofile.avatar }}" alt="" /></a>
+                                </td>
+                                <td class="text">
+                                    <p><a href="/profile/{{user.username}}">{{user.username}}</a> </p>
+                                    <time class="time">Last Login: {{ user.last_login|date:"m/d/Y" }}</time>
+                                </td>
+                                <td class="status">
+                                    ${{user.userprofile.bounties_won|floatformat|default:"0"}}
+                                </td>
+                            </tr>
+
+                        </tbody>
+                        {% endfor %}
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" align="center">
+                                    {% if is_paginated %}
+                                    {% if page_obj.has_previous %}
+                                    <span><a href="?page={{ page_obj.previous_page_number }}">Previous</a></span>
+
+                                    {% endif %}
+                                    <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.</span>
+                                    {% if page_obj.has_next %}
+                                    <span><a href="?page={{ page_obj.next_page_number }}">Next</a></span>
+
+                                    {% endif %}
+
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <section class="col-6 leader-board">
+            <!--frame -->
+            <div class="frame frame-dark">
+                <div class="frame-content">
+                    <h2 class="titlebar"><span class="ribbon ribbon-normal ribbon-04 ribbon-brown-dark"><em
+                                class="icon-custom_star"></em>{% now "F" %} top 10</span></h2>
+                    <table class="table-list table-list-leader-board">
+                        <tbody>
+                            {% for leader in leaderboard %}
+                            <tr>
+                                <td class="thumb">
+                                    <a href="/profile/{{ leader.username }}" class="img-holder"><img
+                                            src="{{ leader.userprofile.avatar }}" alt="" /></a>
+                                </td>
+                                <td class="text">
+                                    <a href="/profile/{{ leader.username }}">{{ leader.username}}</a>
+                                </td>
+                                <td class="price">${{ leader.userprofile.bounties_won}}</td>
+                            </tr>
                             {% endfor %}
-                            <tfoot>
-                              <tr>
-                              <td colspan="4" align="center">
-                               {% if is_paginated %}
-                                  {% if page_obj.has_previous %}
-                                      <span><a href="?page={{ page_obj.previous_page_number }}">Previous</a></span>
-                                      
-                                  {% endif %}
-                                      <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.</span>
-                                  {% if page_obj.has_next %}
-                                      <span><a href="?page={{ page_obj.next_page_number }}">Next</a></span>
-                                      
-                                  {% endif %}
-                                
-                               {% endif %}
-                               </td>
-                              </tr>
-                            </tfoot>
-                        </table>                        
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
-            </section>
-            <section class="col-6 leader-board">
-                <!--frame -->
-                <div class="frame frame-dark">
-                    <div class="frame-content">
-                        <h2 class="titlebar"><span class="ribbon ribbon-normal ribbon-04 ribbon-brown-dark"><em class="icon-custom_star"></em>{% now "F" %} top 10</span></h2>
-                        <table class="table-list table-list-leader-board">
-                            <tbody>
-                              {% for leader in leaderboard %}
-                                  <tr>
-                                      <td class="thumb">
-                                          <a href="/profile/{{ leader.username }}" class="img-holder"><img src="{{ leader.userprofile.avatar }}" alt="" /></a></td>
-                                      <td class="text">
-                                          <a href="/profile/{{ leader.username }}">{{ leader.username}}</a>
-                                      </td>
-                                      <td class="price">${{ leader.userprofile.bounties_won}}</td>
-                                  </tr>
-                              {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-        </div>
+            </div>
+        </section>
     </div>
+</div>
 {% endblock %}

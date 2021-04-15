@@ -9,20 +9,43 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('website', '0011_bounty_checkout_id'),
+        ("website", "0011_bounty_checkout_id"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Taker',
+            name="Taker",
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('is_taken', models.BooleanField(default=True)),
-                ('status', models.CharField(default=b'open', max_length=255, choices=[(b'taken', b'taken'), (b'open', b'open')])),
-                ('issueTaken', models.DateTimeField(auto_now_add=True)),
-                ('issueEnd', models.DateTimeField(null=True, blank=True)),
-                ('issue', models.ForeignKey(to='website.Issue')),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.AutoField(
+                        verbose_name="ID",
+                        serialize=False,
+                        auto_created=True,
+                        primary_key=True,
+                    ),
+                ),
+                ("is_taken", models.BooleanField(default=True)),
+                (
+                    "status",
+                    models.CharField(
+                        default=b"open",
+                        max_length=255,
+                        choices=[(b"taken", b"taken"), (b"open", b"open")],
+                    ),
+                ),
+                ("issueTaken", models.DateTimeField(auto_now_add=True)),
+                ("issueEnd", models.DateTimeField(null=True, blank=True)),
+                (
+                    "issue",
+                    models.ForeignKey(to="website.Issue", on_delete=models.CASCADE),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE
+                    ),
+                ),
             ],
         ),
     ]

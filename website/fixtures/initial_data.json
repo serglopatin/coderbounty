@@ -1,51 +1,121 @@
-[
-    {
-        "pk":1,
-        "model":"website.service",
-        "fields":{
-            "regex":"/(?P<user>\\w*?)/(?P<project>[-\\w]*?)/issues/(?P<number>\\w*)",
-            "domain":"github.com",
-            "name":"Github",
-            "link_template":"/$user/$project/issues/$number",
-            "template":"/repos/$user/$project/issues/$number",
-            "type":"json",
-            "api_url":"https://api.github.com"
+[{
+        "pk": 1,
+        "model": "website.service",
+        "fields": {
+            "regex": "/(?P<user>\\w*?)/(?P<project>[-\\w]*?)/issues/(?P<number>\\w*)",
+            "domain": "github.com",
+            "name": "Github",
+            "link_template": "/$user/$project/issues/$number",
+            "template": "/repos/$user/$project/issues/$number",
+            "type": "json",
+            "api_url": "https://api.github.com"
         }
     },
     {
-        "pk":2,
-        "model":"website.service",
-        "fields":{
-            "regex":"/(?P<user>[a-z0-9_\\s-]*?)/(?P<project>[a-z0-9_\\s-]*?)/issue/(?P<number>[a-z0-9\\s-]*)",
-            "domain":"bitbucket.org",
-            "name":"Bitbucket",
-            "link_template":"/$user/$project/issue/$number/",
-            "template":"/repositories/$user/$project/issues/$number/",
-            "type":"json",
-            "api_url":"https://api.bitbucket.org/1.0"
+        "pk": 2,
+        "model": "website.service",
+        "fields": {
+            "regex": "/(?P<user>[a-z0-9_\\s-]*?)/(?P<project>[a-z0-9_\\s-]*?)/issue/(?P<number>[a-z0-9\\s-]*)",
+            "domain": "bitbucket.org",
+            "name": "Bitbucket",
+            "link_template": "/$user/$project/issue/$number/",
+            "template": "/repositories/$user/$project/issues/$number/",
+            "type": "json",
+            "api_url": "https://api.bitbucket.org/1.0"
         }
     },
     {
-        "pk":3,
-        "model":"website.service",
-        "fields":{
-            "regex":"/p/(?P<project>[a-z0-9\\s-]*?)/issues/detail\\?id=(?P<number>\\w*)",
-            "domain":"code.google.com",
-            "name":"Google Code",
-            "link_template":"/p/$project/issues/detail?id=$number",
-            "template":"/feeds/issues/p/$project/issues/full?id=$number",
-            "type":"xml",
-            "api_url":"https://code.google.com"
+        "pk": 3,
+        "model": "website.service",
+        "fields": {
+            "regex": "/p/(?P<project>[a-z0-9\\s-]*?)/issues/detail\\?id=(?P<number>\\w*)",
+            "domain": "code.google.com",
+            "name": "Google Code",
+            "link_template": "/p/$project/issues/detail?id=$number",
+            "template": "/feeds/issues/p/$project/issues/full?id=$number",
+            "type": "xml",
+            "api_url": "https://code.google.com"
         }
     },
-      {
+    {
         "model": "auth.user",
         "pk": 1,
         "fields": {
-          "first_name": "John",
-          "last_name": "Lennon",
-          "username": "myuser",
-          "password": "pbkdf2_sha256$20000$GOVz4ND4RG0F$J4Z48PYW3VFY58wimhBGX5m4CVIQ2dxAmptO3b92Gdc="
+            "first_name": "John",
+            "last_name": "Lennon",
+            "username": "myuser",
+            "password": "pbkdf2_sha256$20000$GOVz4ND4RG0F$J4Z48PYW3VFY58wimhBGX5m4CVIQ2dxAmptO3b92Gdc="
         }
-      }
+    },
+    {
+        "model": "sites.site",
+        "pk": 1,
+        "fields": {
+            "domain": "localhost",
+            "name": "localhost"
+        }
+    },
+    {
+        "model": "socialaccount.socialapp",
+        "pk": 1,
+        "fields": {
+            "id": "1",
+            "provider": "github",
+            "name": "github",
+            "client_id": "0011223344556677",
+            "secret": "012345678901234567890123456",
+            "key": ""
+        }
+    },
+    {
+        "model": "socialaccount.socialapp_sites",
+        "pk": 1,
+        "fields": {
+            "id": 1,
+            "socialapp_id": 1,
+            "site_id": 1
+        }
+    },
+    {
+        "model": "socialaccount.socialapp",
+        "pk": 2,
+        "fields": {
+            "id": "2",
+            "provider": "google",
+            "name": "google",
+            "client_id": "0011223344556677",
+            "secret": "012345678901234567890123456",
+            "key": ""
+        }
+    },
+    {
+        "model": "socialaccount.socialapp_sites",
+        "pk": 2,
+        "fields": {
+            "id": 2,
+            "socialapp_id": 2,
+            "site_id": 1
+        }
+    },
+    {
+        "model": "socialaccount.socialapp",
+        "pk": 3,
+        "fields": {
+            "id": "3",
+            "provider": "bitbucket",
+            "name": "bitbucket",
+            "client_id": "0011223344556677",
+            "secret": "012345678901234567890123456",
+            "key": ""
+        }
+    },
+    {
+        "model": "socialaccount.socialapp_sites",
+        "pk": 3,
+        "fields": {
+            "id": 3,
+            "socialapp_id": 3,
+            "site_id": 1
+        }
+    }
 ]

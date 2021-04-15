@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
-{% load staticfiles %}
+{% load static %}
 
 {% block content %}
-<script src="{% static "js/all.js" %}"></script>
+<script src="{% static 'js/all.js' %}"></script>
 
 <div class="section-issues clearfix wrapper-global">
     <div class="headbar frame listing">
-        
+
         <h1>Organisations</h1>
 
         <table class="list-table-header">
@@ -27,7 +27,7 @@
                 <div class="frame-content">
                     <table class="organisation-list-table">
                         <tbody>
-                            {% for organisation in organisations %}                            
+                            {% for organisation in organisations %}
                             <tr class="organisation-list-row">
                                 <td class="list-table-org">
                                     <img src="{{}}" class="list-table-image">

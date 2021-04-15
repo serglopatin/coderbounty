@@ -1,25 +1,25 @@
 {% extends 'base.html' %}
-{% load staticfiles %}
+{% load static %}
 
 {% block content %}
-<script src="{% static "js/all.js" %}"></script>
+<script src="{% static 'js/all.js' %}"></script>
 
 <!-- Section - Repositories -->
 <div class="section-issues clearfix wrapper-global">
     <!-- headbar -->
     <div class="headbar repo-headbar">
         <h1>Repositories</h1>
-	    <div class="list-filter-buttons">
-		    <div>
-		        <button class="ribbon ribbon-normal ribbon-green ribbon-02" onclick="">List</button>
-		        <button class="ribbon ribbon-normal ribbon-green ribbon-02" onclick="">Grid</button>
-		    </div>            
-		</div>
+        <div class="list-filter-buttons">
+            <div>
+                <button class="ribbon ribbon-normal ribbon-green ribbon-02" onclick="">List</button>
+                <button class="ribbon ribbon-normal ribbon-green ribbon-02" onclick="">Grid</button>
+            </div>
+        </div>
     </div>
 
     <!-- repositories grid -->
     <div class="issues">
-        {% for repository in repositories %}                            
+        {% for repository in repositories %}
         <div class="item repo-item">
             <section class="frame frame-light">
                 <div class="frame-content">
@@ -37,7 +37,8 @@
 
                         <div class="repo-text-info">
                             <p><span class="bounty-price">$ {}</span>
-                            <span class="repo-bounty">bounty</span></p>
+                                <span class="repo-bounty">bounty</span>
+                            </p>
                             <div class="repo-issues">
                                 <p>Issues</p>
                                 <center>
@@ -52,19 +53,19 @@
                                                 <td> {} </td>
                                                 <td> {} </td>
                                                 <td> {} </td>
-                                            </tr>                                   
+                                            </tr>
                                         </tbody>
-                                    </table>                                    
+                                    </table>
                                 </center>
                             </div>
 
                             <div class="repo-commit">
                                 <p class="commit-info">Latest commit: <br>
-                                <strong>{}: </strong>{}
+                                    <strong>{}: </strong>{}
                                 </p>
                                 <div class="repo-stats">
-                                    <i class="icon-eye"> {}</i> 
-                                    <i class="icon-star-empty"> {}</i> 
+                                    <i class="icon-eye"> {}</i>
+                                    <i class="icon-star-empty"> {}</i>
                                     <i class="icon-code"> {}</i>
                                 </div>
                             </div>
@@ -73,7 +74,7 @@
                 </div>
             </section>
         </div>
-       {% endfor %}
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

@@ -1,33 +1,34 @@
 {% extends 'base.html' %}
-{% load staticfiles %}
+{% load static %}
 
 {% block content %}
-<script src="{% static "js/all.js" %}"></script>
+<script src="{% static 'js/all.js' %}"></script>
 
 <!-- Section - Issues (Find Bounties) -->
 <div class="section-issues clearfix wrapper-global">
     <!-- headbar -->
     <div class="headbar frame listing">
         <h1>FIND ISSUES TO CODE</h1>
-        <br/>
+        <br />
         <div>
             <form action="" method="GET">
                 <label for="filterSort">Filter:</label>
                 <select id="filterSort" name="status">
-                    <option value="all" {% if status == "all" %}selected{% endif %}>
-                    All Issues</option>
-                    <option value="open" {% if status == "open" %}selected{% endif %}>Open</option>
-                    <option value="in review" {% if status == "in review" %}selected{% endif %}>
-                    In Review</option>
-                    <option value="paid" {% if status == "paid" %}selected{% endif %}>Paid</option>
-                    <option value="closed" {% if status == "closed" %}selected{% endif %}>
-                    Closed</option>
+                    <option value="all" {% if status=="all" %}selected{% endif %}>
+                        All Issues</option>
+                    <option value="open" {% if status=="open" %}selected{% endif %}>Open</option>
+                    <option value="in review" {% if status=="in review" %}selected{% endif %}>
+                        In Review</option>
+                    <option value="paid" {% if status=="paid" %}selected{% endif %}>Paid</option>
+                    <option value="closed" {% if status=="closed" %}selected{% endif %}>
+                        Closed</option>
                 </select>
 
                 <select id="filterAll" name="language">
                     <option value="">Any Language</option>
                     {% for language_item in languages %}
-                    <option value="{{language_item}}" {% if language_item == language %}selected{% endif %} >{{language_item}}</option>
+                    <option value="{{language_item}}" {% if language in language_item %}selected{% endif %}>
+                        {{language_item}}</option>
                     {% endfor %}
                 </select>
 
@@ -35,7 +36,8 @@
             </form>
         </div>
 
-        <div class="list-filter-buttons"><!--
+        <div class="list-filter-buttons">
+            <!--
             <div class="left">
                 <button class="ribbon ribbon-normal ribbon-green ribbon-02" value="-issues">
                 Issues</button>
@@ -52,10 +54,12 @@
                 {% if sort == "-views" %}selected{% endif %}>Most Views</button>
             </div>
                 -->
-                <div>
-                    <button class="ribbon ribbon-normal ribbon-green ribbon-02" onclick="location.href='?layout=list';">List</button>
-                    <button class="ribbon ribbon-normal ribbon-green ribbon-02" onclick="location.href='?layout=grid';">Grid</button>
-                </div>
+            <div>
+                <button class="ribbon ribbon-normal ribbon-green ribbon-02"
+                    onclick="location.href='?layout=list';">List</button>
+                <button class="ribbon ribbon-normal ribbon-green ribbon-02"
+                    onclick="location.href='?layout=grid';">Grid</button>
+            </div>
         </div>
 
         <table class="list-table-header">
@@ -88,58 +92,70 @@
                                     <tbody>
                                         <tr>
                                             <td>
-                                              <div class="side-info inline">
-                                                  <a href="/issue/{{issue.id}}" class="img-holder list-image">
-                                                  <img src="{% static "images/temp/thumb-github.jpg" %}" alt="" /></a>
-                                              </div>
+                                                <div class="side-info inline">
+                                                    <a href="/issue/{{issue.id}}" class="img-holder list-image">
+                                                        <img src="{% static 'images/temp/thumb-github.jpg' %}"
+                                                            alt="" /></a>
+                                                </div>
                                             </td>
                                             <td class="list-table-owner">{{issue.project}}</td>
                                             <td class="list-table-issue">#{{issue.number}}</td>
                                             <td class="list-table-title">{{issue.title}}</td>
                                             <td class="list-table-status">
-                                                <a href="/list/?filter={{issue.status|slugify}}" title="{{issue.status}}">
-                                                {% if issue.status == "in review" %}
+                                                <a href="/list/?filter={{issue.status|slugify}}"
+                                                    title="{{issue.status}}">
+                                                    {% if issue.status == "in review" %}
                                                     <span class="icon-clock"></span>
-                                                {% elif issue.status == "paid" %}
+                                                    {% elif issue.status == "paid" %}
                                                     <span class="icon-trophy"></span>
-                                                {% else %}
+                                                    {% else %}
                                                     <i class="icon-banknote"></i>
-                                                {% endif %}
-                                            </a></td>
+                                                    {% endif %}
+                                                </a>
+                                            </td>
                                             <td class="list-table-bounty">
-                                            <h1>${{issue.bounty}}</h1></td>
+                                                <h1>${{issue.bounty}}</h1>
+                                            </td>
                                             <td class="list-table-views">{{issue.views}}</td>
                                             <td>
-                                              <!-- people -->
-                                              <div class="issue-people clearfix inline">
-                                                  <div class="list-people">
-                                                      <ul class="clearfix">
-                                                          {% for bounty in issue.bounties %}
-                                                          <li>
-                                                              <a href="/profile/{{bounty.user.username}}"><img src="{{bounty.user.userprofile.avatar}}" alt="{{bounty.user.username}}" data-toggle="tooltip" title="${{bounty.price}} | {{bounty.created|timesince}} ago | {{bounty.user.username}} " height="30"/></a>
-                                                          </li>
-                                                          {% endfor %}
-                                                      </ul>
-                                                  </div>
+                                                <!-- people -->
+                                                <div class="issue-people clearfix inline">
+                                                    <div class="list-people">
+                                                        <ul class="clearfix">
+                                                            {% for bounty in issue.bounties %}
+                                                            <li>
+                                                                <a href="/profile/{{bounty.user.username}}"><img
+                                                                        src="{{bounty.user.userprofile.avatar}}"
+                                                                        alt="{{bounty.user.username}}"
+                                                                        data-toggle="tooltip"
+                                                                        title="${{bounty.price}} | {{bounty.created|timesince}} ago | {{bounty.user.username}} "
+                                                                        height="30" /></a>
+                                                            </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
 
-                                                  <div class="button-wrapper">
-                                                      {% if issue.get_taker %}
+                                                    <div class="button-wrapper">
+                                                        {% if issue.get_taker %}
 
-                                                          <button class="ribbon ribbon-normal ribbon-03 ribbon" name="take" value="take" style="width:90px;">
-                                                              <div id="timer-{{issue.id}}">{{issue.get_taker.time_remaining}}</div>
-                                                          </button>
+                                                        <button class="ribbon ribbon-normal ribbon-03 ribbon"
+                                                            name="take" value="take" style="width:90px;">
+                                                            <div id="timer-{{issue.id}}">
+                                                                {{issue.get_taker.time_remaining}}</div>
+                                                        </button>
 
-                                                          <script>
-                                                              startTimer("{{issue.get_taker.time_remaining_seconds}}", document.querySelector('#timer-{{issue.id}}'));
-                                                          </script>
-                                                      {% else %}
-                                                          <form action="/issue/{{issue.id}}/" method="post">
-                                                          {% csrf_token %}
-                                                              <button class="ribbon ribbon-normal ribbon-03 take" name="take" value="take">Take</button>
-                                                          </form>
-                                                      {% endif %}
-                                                  </div>
-                                              </div>
+                                                        <script>
+                                                            startTimer("{{issue.get_taker.time_remaining_seconds}}", document.querySelector('#timer-{{issue.id}}'));
+                                                        </script>
+                                                        {% else %}
+                                                        <form action="/issue/{{issue.id}}/" method="post">
+                                                            {% csrf_token %}
+                                                            <button class="ribbon ribbon-normal ribbon-03 take"
+                                                                name="take" value="take">Take</button>
+                                                        </form>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
                                             </td>
                                         </tr>
                                     </tbody>

@@ -11,20 +11,46 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('website', '0019_auto_20160403_1234'),
+        ("website", "0019_auto_20160403_1234"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Payment',
+            name="Payment",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('amount', models.DecimalField(decimal_places=0, max_digits=10)),
-                ('created', models.DateTimeField()),
-                ('updated', models.DateTimeField()),
-                ('issue', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='website.Issue')),
-                ('solution', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='website.Solution')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("amount", models.DecimalField(decimal_places=0, max_digits=10)),
+                ("created", models.DateTimeField()),
+                ("updated", models.DateTimeField()),
+                (
+                    "issue",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="website.Issue",
+                    ),
+                ),
+                (
+                    "solution",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="website.Solution",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

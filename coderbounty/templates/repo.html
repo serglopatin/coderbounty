@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
-{% load staticfiles %}
+{% load static %}
 
 {% block content %}
-<script src="{% static "js/all.js" %}"></script>
+<script src="{% static 'js/all.js' %}"></script>
 
 <!-- Section - Repositories -->
 <div class="section-issues clearfix wrapper-global">
@@ -13,7 +13,7 @@
             <div>
                 <button class="ribbon ribbon-normal ribbon-green ribbon-02" onclick="">List</button>
                 <button class="ribbon ribbon-normal ribbon-green ribbon-02" onclick="">Grid</button>
-            </div>            
+            </div>
         </div>
 
         <table class="list-table-header">
@@ -23,7 +23,7 @@
                     <th class="list-table-header-issues"># of issues</th>
                     <th class="list-table-header-bounty">Total bounty</th>
                     <th class="list-table-header-languages">Programming Language(s)</th>
-                    <th class="list-table-header-coverage">Bounty Coverage</th>                    
+                    <th class="list-table-header-coverage">Bounty Coverage</th>
                     <th class="list-table-header-contributors">Top contributors</th>
                 </tr>
             </tbody>
@@ -35,7 +35,7 @@
                 <div class="frame-content">
                     <table class="organisation-list-table">
                         <tbody>1
-                            {% for repository in repositories %}                            
+                            {% for repository in repositories %}
                             <tr class="organisation-list-row">
                                 <td class="list-table-repository">
                                     <img src="" class="list-table-image">

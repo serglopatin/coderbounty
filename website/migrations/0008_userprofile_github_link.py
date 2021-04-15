@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='userprofile',
             name='github_link',
-            field=models.CharField(help_text=b'https://github.com/seanauriti/', max_length=100, null=True, verbose_name=b'GitHub account', blank=True),
+            field=models.CharField(help_text=b'https://github.com/username/', max_length=100, null=True, verbose_name=b'GitHub account', blank=True),
             preserve_default=True,
         ),
     ]

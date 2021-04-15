@@ -1,23 +1,25 @@
 {% extends 'base.html' %}
-{% load staticfiles %}
+{% load static %}
 
 {% block content %}
-<script src="{% static "js/all.js" %}"></script>
+<script src="{% static 'js/all.js' %}"></script>
 <!-- Section - Issues (Find Bounties) -->
 <div class="section-issues clearfix wrapper-global">
     <!-- headbar -->
     <div class="headbar frame listing">
-        <h1 class="titlebar-paper"><span >Open Bountie$</span></h1>
+        <h1 class="titlebar-paper"><span>Open Bountie$</span></h1>
 
-            <div class="filter">
-                <form action="" method="GET">
+        <div class="filter">
+            <form action="" method="GET">
                 <label for="filterAll">Language:</label>
                 <select id="filterAll" name="language">
                     <option value="">Any</option>
                     {% for language_item in languages %}
-                    <option value="{{language_item}}" {% if language_item == language %}selected{% endif %} >{{language_item}}</option>
+                    <option value="{{language_item}}" {% if language_item == language %}selected{% endif %}>
+                        {{language_item}}</option>
                     {% endfor %}
                 </select>
+
 
                 <label for="filterSort">Status:</label>
                 <select id="filterSort" name="status">
@@ -28,7 +30,7 @@
                     <option value="closed" {% if status == "closed" %}selected{% endif %}>Closed</option>
                     <option value="all" {% if status == "all" %}selected{% endif %}>All</option>
                 </select>
-             
+
                 <label for="filterSort">Sort by:</label>
                 <select id="filterSort" name="sort">
                     <option value="-created" {% if sort == "-created" %}selected{% endif %}>Most Recent</option>
@@ -36,12 +38,12 @@
                     <option value="-views" {% if sort == "-views" %}selected{% endif %}>Most Views</option>
                     <option value="-modified" {% if sort == "-modified" %}selected{% endif %}>Last Modified</option>
                 </select>
-            
-                    <button class="ribbon ribbon-normal ribbon-green ribbon-03">Find</button>
-                    </form>
-            </div>
 
-            <div class="list-filter-buttons">
+                <button class="ribbon ribbon-normal ribbon-green ribbon-03">Find</button>
+            </form>
+        </div>
+
+        <div class="list-filter-buttons">
             <!--
                 <div class="left">
                     <button class="ribbon ribbon-normal ribbon-green ribbon-02" value="-issues">
@@ -59,11 +61,12 @@
                     {% if sort == "-views" %}selected{% endif %}>Most Views</button>
                 </div>
                 -->
-                <div>
-                    <!--<button class="ribbon ribbon-normal ribbon-green ribbon-02" onclick="location.href=location.href+'?layout=list';">List</button>-->
-                    <button class="ribbon ribbon-normal ribbon-green ribbon-02" onclick="location.href=location.href+'?layout=grid';">Grid</button>
-                </div>            
+            <div>
+                <!--<button class="ribbon ribbon-normal ribbon-green ribbon-02" onclick="location.href=location.href+'?layout=list';">List</button>-->
+                <button class="ribbon ribbon-normal ribbon-green ribbon-02"
+                    onclick="location.href=location.href+'?layout=grid';">Grid</button>
             </div>
+        </div>
 
 
     </div>
@@ -74,83 +77,96 @@
             <section class="frame frame-light">
                 <div class="frame-content">
                     <!--info-->
-                   
+
                     <div class="issue-info clearfix">
                         <div class="side-info">
-                            <a href="/issue/{{issue.id}}" class="img-holder"><img src="https://github.com/{{issue.user}}.png?size=75" alt="" /></a>
+                            <a href="/issue/{{issue.id}}" class="img-holder"><img
+                                    src="https://github.com/{{issue.user}}.png?size=75" alt="" /></a>
                             <p class="price">${{issue.bounty}}</p>
                             {% if issue.winner %}
-                                <a href="/profile/{{issue.winner.username}}"><img src="{{issue.winner.userprofile.avatar}}" alt="{{issue.winner.username}}" data-toggle="tooltip" title="${{issue.bounty}} won by {{issue.winner.username}} " 
-                                style="border: solid 2px #453527; height:50px;" /></a>
-                               <img src="{% static 'images/layout/money_bag.png' %}" > 
-                    
+                            <a href="/profile/{{issue.winner.username}}"><img src="{{issue.winner.userprofile.avatar}}"
+                                    alt="{{issue.winner.username}}" data-toggle="tooltip"
+                                    title="${{issue.bounty}} won by {{issue.winner.username}} "
+                                    style="border: solid 2px #453527; height:50px;" /></a>
+                            <img src="{% static 'images/layout/money_bag.png' %}">
+
                             {% else %}
                             <form action="/post/" method="GET">
                                 <input type="hidden" name="url" value="{{issue.html_url}}">
                                 <button class="ribbon ribbon-normal ribbon-03 ribbon-brown-dark">Add $</button>
                             </form>
                             <div class="logo-tech">
-                                
+
                             </div>
                             {% endif %}
                         </div>
-                        
+
                         <div class="issue-status">
                             <a href="/list/?filter={{issue.status|slugify}}" title="{{issue.status}}">
-                            {% if issue.status == "in review" %}
+                                {% if issue.status == "in review" %}
                                 <span class="icon-clock"></span>
-                            {% elif issue.status == "paid" %}
+                                {% elif issue.status == "paid" %}
                                 <span class="icon-trophy"></span>
-                            {% else %}
+                                {% else %}
                                 <i class="icon-banknote"></i>
-                            {% endif %}
+                                {% endif %}
                             </a>
                         </div>
                         <a href="/issue/{{issue.id}}" style="color:#675B4D;">
-                        <div class="text">
-                            
-                            <ul class="issue-id">
-                                <li class="number">#{{issue.number}}</li>
-                                <li class="owner">{{issue.project}}</li>
-                            </ul> 
-                            <h3>{{issue.title}}</h3>
-                            <p class="desc">{{issue.content}}</p>
-                            <div class="posted">
-                            <i class="icon-calendar" ></i> {{issue.created|date:"m/d/Y"}} <i class="icon-eye" ></i> {{issue.views}} <i class="icon-{{issue.language|slugify}}"  title="{{issue.language}}"></i></div>
-                        </div>
-                         </a>
+                            <div class="text">
+
+                                <ul class="issue-id">
+                                    <li class="number">#{{issue.number}}</li>
+                                    <li class="owner">{{issue.project}}</li>
+                                </ul>
+                                <h3>{{issue.title}}</h3>
+                                <p class="desc">{{issue.content}}</p>
+                                <div class="posted">
+                                    <i class="icon-calendar"></i> {{issue.created|date:"m/d/Y"}} <i
+                                        class="icon-eye"></i> {{issue.views}} <i class="icon-{{issue.language|slugify}}"
+                                        title="{{issue.language}}"></i>
+                                </div>
+                            </div>
+                        </a>
                     </div>
 
                     <!-- people -->
                     <div class="issue-people clearfix">
                         <ul class="clearfix">
                             {% for bounty in issue.bounties %}
-                                <li>
-                                    <a href="/profile/{{bounty.user.username}}"><img src="{{bounty.user.userprofile.avatar}}" alt="{{bounty.user.username}}" data-toggle="tooltip" title="${{bounty.price}} | {{bounty.created|timesince}} ago | {{bounty.user.username}} " /></a><br>
-                                </li>
+                            <li>
+                                <a href="/profile/{{bounty.user.username}}"><img
+                                        src="{{bounty.user.userprofile.avatar}}" alt="{{bounty.user.username}}"
+                                        data-toggle="tooltip"
+                                        title="${{bounty.price}} | {{bounty.created|timesince}} ago | {{bounty.user.username}} " /></a><br>
+                            </li>
                             {% endfor %}
                         </ul>
                         <div class="button-wrapper">
                             {% if issue.get_taker %}
 
-                                <button class="ribbon ribbon-normal ribbon-03 ribbon" name="take" value="take" style="width:90px;">
-                                    <div id="timer-{{issue.id}}">{{issue.get_taker.time_remaining}}</div>
-                                </button>
-                                
-                                <script>
-                                    startTimer("{{issue.get_taker.time_remaining_seconds}}", document.querySelector('#timer-{{issue.id}}'));
-                                </script>
-                                </a>
+                            <button class="ribbon ribbon-normal ribbon-03 ribbon" name="take" value="take"
+                                style="width:90px;">
+                                <div id="timer-{{issue.id}}">{{issue.get_taker.time_remaining}}</div>
+                            </button>
+
+                            <script>
+                                startTimer("{{issue.get_taker.time_remaining_seconds}}", document.querySelector(
+                                    '#timer-{{issue.id}}'));
+                            </script>
+                            </a>
 
                             {% else %}
-                                {% if not issue.winner %}
-                                <form action="/issue/{{issue.id}}/" method="post">{% csrf_token %}
-                                    <button class="ribbon ribbon-normal ribbon-03 ribbon" name="take" value="take">Take</button>
-                                </form>
-                                {% else %}
-                                 
-                                    <button class="ribbon ribbon-normal ribbon-03 ribbon" name="paid" value="take">Paid <span class="icon-trophy"></span></button>
-                                {% endif %}
+                            {% if not issue.winner %}
+                            <form action="/issue/{{issue.id}}/" method="post">{% csrf_token %}
+                                <button class="ribbon ribbon-normal ribbon-03 ribbon" name="take"
+                                    value="take">Take</button>
+                            </form>
+                            {% else %}
+
+                            <button class="ribbon ribbon-normal ribbon-03 ribbon" name="paid" value="take">Paid <span
+                                    class="icon-trophy"></span></button>
+                            {% endif %}
                             {% endif %}
                         </div>
                     </div>
@@ -161,7 +177,7 @@
         <h1>
             Sorry, no bounties found. Please try again.
         </h1>
-        {% endfor %}            
+        {% endfor %}
     </div>
 </div>
 {% endblock %}
