@@ -518,15 +518,15 @@ class PayView(DetailView):
 
 class IssueDetailView(DetailView):
     model = Issue
-    slug_field = "id"
+    # slug_field = "id"
     template_name = "issue.html"
 
     def get(self, request, *args, **kwargs):
-        try:
-            self.object = self.get_object()
-        except:
-            messages.error(self.request, "That issue was not found.")
-            return redirect("/")
+        # try:
+        #     self.object = self.get_object()
+        # except:
+        #     messages.error(self.request, "That issue was not found.")
+        #     return redirect("/")
 
         if self.request.GET.get("paymentId"):
             import paypalrestsdk
@@ -598,7 +598,7 @@ class IssueDetailView(DetailView):
                     issue.status = "closed"
                 issue.save()
         if self.request.POST.get("take"):
-            if self.request.user.is_authenticated():
+            if self.request.user.is_authenticated:
                 taker = Taker(issue=self.get_object(), user=self.request.user)
                 taker.save()
                 issue = self.get_object()
@@ -641,7 +641,7 @@ class IssueDetailView(DetailView):
         if self.request.POST.get("solution"):
             if self.get_object().status not in ("closed", "in review"):
 
-                if self.request.user.is_authenticated():
+                if self.request.user.is_authenticated:
                     solution = Solution(
                         issue=self.get_object(),
                         user=self.request.user,
@@ -707,7 +707,7 @@ class IssueDetailView(DetailView):
 
     def get_object(self):
         object = super(IssueDetailView, self).get_object()
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             object.views = object.views + 1
             object.save()
         return object

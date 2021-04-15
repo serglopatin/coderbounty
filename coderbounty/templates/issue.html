@@ -231,7 +231,7 @@
                     <a href="{% url 'profile' comment.username %}">
                       <div class="img-holder">
                         <img src="https://github.com/{{comment.username}}.png?size=75" alt=""
-                          onerror="this.src='{% static 'images/temp/thumb-medium-00.jpg" %}';" />
+                          onerror='this.src="/static/images/temp/thumb-medium-00.jpg";' />
                       </div>
                     </a>
                     <a href="{% url 'profile' comment.username %}">
