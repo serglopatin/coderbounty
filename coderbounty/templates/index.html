@@ -60,11 +60,15 @@
                                         {% else %}<a href="{{ activity.actor_url }}">{{ activity.actor }}</a>{% endif %}
                                         {{ activity.verb }}
                                         {% if activity.action_object %}
-                                        {% if activity.action_object.get_absolute_url %}<a
-                                            href="{{ activity.action_object.get_absolute_url }}">
-                                            {{ activity.action_object }}</a>
-                                        {% else %}<a href="{{ activity.action_object_url }}">
-                                            {{ activity.action_object }}</a>{% endif %}
+                                            {% if activity.action_object.get_absolute_url %}
+                                                <a href="{{ activity.action_object.get_absolute_url }}">
+                                                    {{ activity.action_object }}
+                                                </a>
+                                            {% else %}
+                                                <a href="{{ activity.action_object_url }}">
+                                                    {{ activity.action_object }}
+                                                </a>
+                                            {% endif %}
                                         {% endif %}
                                         {% if activity.action_object and activity.target %}to{% endif %}
                                         {% if activity.target %}
