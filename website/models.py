@@ -243,7 +243,9 @@ class UserProfile(models.Model):
         gravatar_url = "http://www.gravatar.com/avatar.php?"
         gravatar_url += urllib.parse.urlencode(
             {
-                "gravatar_id": hashlib.md5(self.user.email.lower().encode('utf-8')).hexdigest(),
+                "gravatar_id": hashlib.md5(
+                    self.user.email.lower().encode("utf-8")
+                ).hexdigest(),
                 "default": "retro",
                 "size": str(size),
             }
@@ -400,7 +402,7 @@ class Solution(models.Model):
     status = models.CharField(max_length=250, choices=STATUS_CHOICES, default=OPEN)
 
     def get_absolute_url(self):
-        return self.url
+        return "/solution/%s" % self.id
 
     def __unicode__(self):
         return "solution #%s" % self.id
