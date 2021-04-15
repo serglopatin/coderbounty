@@ -34,7 +34,7 @@ urlpatterns = (
         name="edit_profile",
     ),
     url(r"^help/$", TemplateView.as_view(template_name="help.html"), name="help"),
-    url(r"^issue/(?P<slug>\w+)/$", IssueDetailView.as_view(), name="issue"),
+    url(r"^issue/(?P<id>\w+)/$", IssueDetailView.as_view(), name="issue"),
     url(r"^leaderboard/$", LeaderboardView.as_view(), name="leaderboard"),
     url(r"^list/$", website.views.list, name="list"),
     url(

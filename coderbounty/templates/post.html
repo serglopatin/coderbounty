@@ -163,7 +163,10 @@
                                         <input type="text" id="title" name="title"
                                             value="{{form.title.value|default:''}}" />
                                         {% for error_field,error_value in errors.items %} 
-                                        {% if error_field == 'title' %} {{ error_value }} {% endif %} {% endfor %}
+                                        {% if error_field == 'title' %} 
+                                        {{ error_value }} 
+                                        {% endif %} 
+                                        {% endfor %}
                                     </div>
                                 </div>
                                 <!-- -->
