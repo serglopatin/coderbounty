@@ -3,3 +3,5 @@ venv
 /venv
 db.sqlite3
 coderbounty.db
+/staticfiles
+.env

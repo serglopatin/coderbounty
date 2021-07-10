@@ -1,84 +1,183 @@
 {% extends 'base.html' %}
-{% load staticfiles %}
+{% load static %}
 
 {% block content %}
-	<!-- Section - Issues (Find Bounties) -->
-	<div class="section-issues clearfix wrapper-global">
-		<!-- headbar -->
-        <div class="headbar">
-			<h2>Find Issues to Code</h2>
-			<div class="filter">
-				<form>
-					<label for="filterAll">Language:</label>
-					<select id="filterAll">
-                    	<option>Any</option>
-                        <option>Issue #1</option>
-                        <option>Issue #2</option>
-                        <option>Issue #3</option>
-                        <option>Issue #4</option>
-					</select>
-                    <label for="filterSort">Sort by:</label>
-                    <select id="filterSort">
-                    	<option>Most Recent</option>
-                        <option>English Language</option>
-                        <option>French Language</option>
-                        <option>Italian Language</option>
-                        <option>Spain Language</option>
-					</select>
-                    <button class="ribbon ribbon-normal ribbon-green ribbon-03">Find</button>
-				</form>
-			</div>
-		</div>
-        <!-- issues -->
-        <div class="issues">
-            <!-- -->
-            {% for issue in issues %}
-                <div class="item">
-                    <section class="frame frame-light">
-                        <div class="frame-content">
-                            <!--info-->
-                            <div class="issue-info clearfix">
-                                <div class="side-info">
-                                    <a href="/issue/{{issue.id}}" class="img-holder"><img src="{% static "images/temp/thumb-github.jpg" %}" alt="" /></a>
-                                    <p class="price">${{issue.bounty}}</p>
-                                    <form>
-                                        <button class="ribbon ribbon-normal ribbon-03 ribbon-brown-dark">Add $</button>
-                                    </form>
-                                </div>
-                                <div class="text">
-                                    <!-- hide until we have all icons <div class="issue-status">
-                                        <span class="icon-custom_yes"></span>
-                                    </div>
-                                    -->
-                                    <ul class="issue-id">
-                                        <li class="number">#{{issue.number}}</li>
-                                        <li class="owner">{{issue.project}}</li>
-                                    </ul> 
-                                    <h3>{{issue.title}}</h3>
-                                    <p>{{issue.content}}</p>
-                                    <div class="logo-tech">
-                                        <img src="{{ STATIC_URL }}images/logos/logo-{{issue.language|slugify}}.png" alt=" {{issue.language}}" />
-                                    </div>
-                                    <div class="posted"><em>Posted: <time>{{issue.created|date:"m/d/Y"}}</time></em> <em>Views: <time>{{issue.views}}</time></em></div>
-                                </div>
-                            </div>
-                            <!-- people -->
-                            <div class="issue-people clearfix">
-                                <ul class="clearfix">
-                                {% for bounty in issue.bounties %}
-                                    <li><a href="/profile/{{bounty.user.username}}"><img src="{{bounty.user.userprofile.gravatar}}" alt="{{bounty.user.username}}" /></a></li>
-                                {% endfor %}
-                                </ul>
-                                <div class="button-wrapper">
-                                    <form>
-                                        <button class="ribbon ribbon-normal ribbon-03 ribbon">Take</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                </div>
-            {% endfor %}            
+<script src="{% static 'js/all.js' %}"></script>
+<!-- Section - Issues (Find Bounties) -->
+<div class="section-issues clearfix wrapper-global">
+    <!-- headbar -->
+    <div class="headbar frame listing">
+        <h1 class="titlebar-paper"><span>Open Bountie$</span></h1>
+
+        <div class="filter">
+            <form action="" method="GET">
+                <label for="filterAll">Language:</label>
+                <select id="filterAll" name="language">
+                    <option value="">Any</option>
+                    {% for language_item in languages %}
+                    <option value="{{language_item}}" {% if language_item == language %}selected{% endif %}>
+                        {{language_item}}</option>
+                    {% endfor %}
+                </select>
+
+
+                <label for="filterSort">Status:</label>
+                <select id="filterSort" name="status">
+                    <option value="open" {% if status == "open" %}selected{% endif %}>Open</option>
+                    <option value="in review" {% if status == "in review" %}selected{% endif %}>In Review</option>
+                    <option value="taken" {% if status == "taken" %}selected{% endif %}>Taken</option>
+                    <option value="paid" {% if status == "paid" %}selected{% endif %}>Paid</option>
+                    <option value="closed" {% if status == "closed" %}selected{% endif %}>Closed</option>
+                    <option value="all" {% if status == "all" %}selected{% endif %}>All</option>
+                </select>
+
+                <label for="filterSort">Sort by:</label>
+                <select id="filterSort" name="sort">
+                    <option value="-created" {% if sort == "-created" %}selected{% endif %}>Most Recent</option>
+                    <option value="-bounty" {% if sort == "-bounty" %}selected{% endif %}>Highest Bounty</option>
+                    <option value="-views" {% if sort == "-views" %}selected{% endif %}>Most Views</option>
+                    <option value="-modified" {% if sort == "-modified" %}selected{% endif %}>Last Modified</option>
+                </select>
+
+                <button class="ribbon ribbon-normal ribbon-green ribbon-03">Find</button>
+            </form>
         </div>
-	</div>
+
+        <div class="list-filter-buttons">
+            <!--
+                <div class="left">
+                    <button class="ribbon ribbon-normal ribbon-green ribbon-02" value="-issues">
+                    Issues</button>
+                    <button class="ribbon ribbon-normal ribbon-green ribbon-02" value="-user/org">
+                    User/Org</button>
+                </div>
+
+                <div class="left">
+                    <button class="ribbon ribbon-normal ribbon-green ribbon-02" value="-created"
+                    {% if sort == "-created" %}selected{% endif %}>Recent</button>
+                    <button class="ribbon ribbon-normal ribbon-green ribbon-02" value="-bounty"
+                    {% if sort == "-bounty" %}selected{% endif %}>Highest Bounty</button>
+                    <button class="ribbon ribbon-normal ribbon-green ribbon-02" value="-views"
+                    {% if sort == "-views" %}selected{% endif %}>Most Views</button>
+                </div>
+                -->
+            <div>
+                <!--<button class="ribbon ribbon-normal ribbon-green ribbon-02" onclick="location.href=location.href+'?layout=list';">List</button>-->
+                <button class="ribbon ribbon-normal ribbon-green ribbon-02"
+                    onclick="location.href=location.href+'?layout=grid';">Grid</button>
+            </div>
+        </div>
+
+
+    </div>
+    <!-- issues -->
+    <div class="issues">
+        {% for issue in issues %}
+        <div class="item">
+            <section class="frame frame-light">
+                <div class="frame-content">
+                    <!--info-->
+
+                    <div class="issue-info clearfix">
+                        <div class="side-info">
+                            <a href="/issue/{{issue.id}}" class="img-holder"><img
+                                    src="https://github.com/{{issue.user}}.png?size=75" alt="" /></a>
+                            <p class="price">${{issue.bounty}}</p>
+                            {% if issue.winner %}
+                            <a href="/profile/{{issue.winner.username}}"><img src="{{issue.winner.userprofile.avatar}}"
+                                    alt="{{issue.winner.username}}" data-toggle="tooltip"
+                                    title="${{issue.bounty}} won by {{issue.winner.username}} "
+                                    style="border: solid 2px #453527; height:50px;" /></a>
+                            <img src="{% static 'images/layout/money_bag.png' %}">
+
+                            {% else %}
+                            <form action="/post/" method="GET">
+                                <input type="hidden" name="url" value="{{issue.html_url}}">
+                                <button class="ribbon ribbon-normal ribbon-03 ribbon-brown-dark">Add $</button>
+                            </form>
+                            <div class="logo-tech">
+
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="issue-status">
+                            <a href="/list/?filter={{issue.status|slugify}}" title="{{issue.status}}">
+                                {% if issue.status == "in review" %}
+                                <span class="icon-clock"></span>
+                                {% elif issue.status == "paid" %}
+                                <span class="icon-trophy"></span>
+                                {% else %}
+                                <i class="icon-banknote"></i>
+                                {% endif %}
+                            </a>
+                        </div>
+                        <a href="/issue/{{issue.id}}" style="color:#675B4D;">
+                            <div class="text">
+
+                                <ul class="issue-id">
+                                    <li class="number">#{{issue.number}}</li>
+                                    <li class="owner">{{issue.project}}</li>
+                                </ul>
+                                <h3>{{issue.title}}</h3>
+                                <p class="desc">{{issue.content}}</p>
+                                <div class="posted">
+                                    <i class="icon-calendar"></i> {{issue.created|date:"m/d/Y"}} <i
+                                        class="icon-eye"></i> {{issue.views}} <i class="icon-{{issue.language|slugify}}"
+                                        title="{{issue.language}}"></i>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- people -->
+                    <div class="issue-people clearfix">
+                        <ul class="clearfix">
+                            {% for bounty in issue.bounties %}
+                            <li>
+                                <a href="/profile/{{bounty.user.username}}"><img
+                                        src="{{bounty.user.userprofile.avatar}}" alt="{{bounty.user.username}}"
+                                        data-toggle="tooltip"
+                                        title="${{bounty.price}} | {{bounty.created|timesince}} ago | {{bounty.user.username}} " /></a><br>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="button-wrapper">
+                            {% if issue.get_taker %}
+
+                            <button class="ribbon ribbon-normal ribbon-03 ribbon" name="take" value="take"
+                                style="width:90px;">
+                                <div id="timer-{{issue.id}}">{{issue.get_taker.time_remaining}}</div>
+                            </button>
+
+                            <script>
+                                startTimer("{{issue.get_taker.time_remaining_seconds}}", document.querySelector(
+                                    '#timer-{{issue.id}}'));
+                            </script>
+                            </a>
+
+                            {% else %}
+                            {% if not issue.winner %}
+                            <form action="/issue/{{issue.id}}/" method="post">{% csrf_token %}
+                                <button class="ribbon ribbon-normal ribbon-03 ribbon" name="take"
+                                    value="take">Take</button>
+                            </form>
+                            {% else %}
+
+                            <button class="ribbon ribbon-normal ribbon-03 ribbon" name="paid" value="take">Paid <span
+                                    class="icon-trophy"></span></button>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        {% empty %}
+        <h1>
+            Sorry, no bounties found. Please try again.
+        </h1>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

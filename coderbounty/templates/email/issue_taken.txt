@@ -1,0 +1,8 @@
+Hi {{user}},
+
+Thank you for taking issue {{issue.project}} #{{issue.number}}. You have {{time_remaining}} time remaining to submit your solution. When you are ready to submit your solution go to: http://coderbounty.com{{issue.get_absolute_url}}
+
+Wrangle 'em in, hee haw!
+
+CoderBounty Team
+www.coderbounty.com

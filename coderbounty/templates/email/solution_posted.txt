@@ -1,0 +1,12 @@
+Hi {{user}},
+
+A solution has been posted to {{issue.project}} #{{issue.number}}
+
+Please have a look at http://coderbounty.com{{issue.get_absolute_url}}
+
+If the solution is good, please click the "pay" link under the solution on the bottom right.
+
+Thanks for using Coderbounty!
+
+Coderbounty
+www.coderbounty.com

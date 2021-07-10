@@ -1,0 +1,145 @@
+/*
+=====================
+ RIBBON =============
+===================== 
+*/
+.ribbon {	
+	background-color:#BA5A43;
+	color:#F3EFE4;
+	text-decoration:none;
+	text-transform:uppercase;
+	display:inline-block;
+	position:relative;
+	-webkit-text-stroke: 0.05px;
+	border:none;
+	position:relative;
+	z-index:10;}
+a.ribbon,
+button.ribbon,
+inpyt[type="submit"].ribbon {
+	cursor:pointer;
+	font-family:'RegulatorsRegular',serif !important;}
+a.ribbon.ribbon-type-01,
+button.ribbon.ribbon-type-01,
+inpyt[type="submit"].ribbon.ribbon-type-01 {
+	font-family:'CalistoMtRegular',serif !important;
+	font-size:12px;}
+
+.ribbon-normal,
+.ribbon-large {
+	font-family:'AdamantcRegular',serif !important;
+	font-weight:normal;
+	line-height:100%;
+	letter-spacing:1px;
+	font-weight:normal !important;}
+.ribbon-normal {
+	font-size:17px;
+	line-height:24px}
+.ribbon-large {
+	font-size:24px;
+	margin-left:23px;
+	margin-right:23px;}
+	
+.ribbon.ribbon-type-01 {
+	font-size:11px !important;}
+
+a.ribbon:hover,
+button.ribbon:hover {
+	background-color:#000;
+	font-family:'RegulatorsRegular',serif !important;
+	color:#fff;}
+a.ribbon.ribbon-type-01:hover,
+button.ribbon.ribbon-type-01:hover {
+	font-family:'CalistoMtRegular',serif !important;}
+
+/*ribbon button*/
+a.ribbon.ribbon-normal:hover,
+button.ribbon.ribbon-normal:hover {
+	box-shadow: 0 2px 0 #000, 0 -2px 0 #000;}
+a.ribbon.ribbon-large:hover,
+button.ribbon.ribbon-large:hover {
+	box-shadow: 0 3px 0 #000, 0 -3px 0 #000;}
+a.ribbon:hover:after,
+button.ribbon:hover:after,
+a.ribbon:hover:before,
+button.ribbon:hover:before {
+	color:#000;}
+
+button.ribbon-normal::-moz-focus-inner,
+button.ribbon-large::-moz-focus-inner { 
+	margin-top:-1px; 
+	margin-bottom: -1px;}
+
+.ribbon:after,
+.ribbon:before {
+	font-family:'cb-icons';
+	position:absolute;
+	color:#BA5A43;}
+
+/*ribbon size*/
+.ribbon.ribbon-normal {
+	padding:2px 8px 1px 8px;
+	border:solid 2px #F4EEE1;
+	line-height: 21px;
+	display: inline-block;
+	box-shadow: 0 2px 0 #BA5A43, 0 -2px 0 #BA5A43;}
+.ribbon.ribbon-normal:after,
+.ribbon.ribbon-normal:before {
+	font-size:32px;
+	line-height:16px;
+	top:4px;}
+.ribbon.ribbon-normal:after {right:-31px;}
+.ribbon.ribbon-normal:before {left:-31px;}
+
+.ribbon.ribbon-large {
+	padding:8px 8px 4px;
+	border:solid 3px #F4EEE1;
+	box-shadow: 0 3px 0 #BA5A43, 0 -3px 0 #BA5A43;}
+.ribbon.ribbon-large:after,
+.ribbon.ribbon-large:before {
+	font-size:48px;
+	line-height:24px;
+	top:6px;}
+.ribbon.ribbon-large:after {right:-47px;}
+.ribbon.ribbon-large:before {left:-47px;}
+
+/*ribbon types */
+.ribbon-01:after {content: "\e7ab";}
+.ribbon-01:before {content: "\e7ac";}
+.ribbon-02:after {content: "\e7af";}
+.ribbon-02:before {content: "\e7b0";}
+.ribbon-03:after {content: "\e7ad";}
+.ribbon-03:before {content: "\e7ae";}
+.ribbon-04:after {content: "\e7b6";}
+.ribbon-04:before {content: "\e7b5";}
+
+/*ribbon colours*/
+.ribbon-brown {
+	background-color:#9A8C76;}
+.ribbon-brown.ribbon-normal {
+	box-shadow: 0 2px 0 #9A8C76, 0 -2px 0 #9A8C76;}
+.ribbon-brown.ribbon-large {
+	box-shadow: 0 3px 0 #9A8C76, 0 -3px 0 #9A8C76;}
+.ribbon-brown:after,
+.ribbon-brown:before {
+	color:#9A8C76;}
+
+.ribbon-brown-dark {
+	background-color:#3F3328;}
+.ribbon-brown-dark.ribbon-normal {
+	box-shadow: 0 2px 0 #3F3328, 0 -2px 0 #3F3328;}
+.ribbon-brown-dark.ribbon-large {
+	box-shadow: 0 3px 0 #3F3328, 0 -3px 0 #3F3328;}
+.ribbon-brown-dark:after,
+.ribbon-brown-dark:before {
+	color:#3F3328;}
+
+.ribbon-green {
+	background-color:#75857B;}
+.ribbon-green.ribbon-normal {
+	box-shadow: 0 2px 0 #75857B, 0 -2px 0 #75857B;}
+.ribbon-green.ribbon-large {
+	box-shadow: 0 3px 0 #75857B, 0 -3px 0 #75857B;}
+.ribbon-green:after,
+.ribbon-green:before {
+	color:#75857B;}

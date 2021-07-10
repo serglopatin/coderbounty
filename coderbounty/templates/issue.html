@@ -1,10 +1,29 @@
 {% extends 'base.html' %}
-{% load staticfiles %}
+{% load static %}
+
 {% block title %}
-{{ object.project }} | Issue #{{object.number}} | {{object.title}} | 
+{{ object.project }} | Issue #{{object.number}} | {{object.title}} |
 {% endblock %}
+
+{% block meta %}
+<meta name="description" content="{{object.title|safe}}">
+<meta property="og:url" content="http://coderbounty.com{{object.get_absolute_url}}" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="{{object.project}} - {{object.title}}" />
+<meta property="og:description" content="{{object.description|safe}}" />
+<meta property="og:image" content="http://coderbounty.com/get_bounty_image/{{object.id}}" />
+{% endblock %}
+
 {% block content %}
-  <!-- Content -->
+<div id="fb-root"></div>
+<script>(function (d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.7";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));</script>
+
 <div class="wrapper-section">
   <div class="content wrapper-global">
     <div class="grid">
@@ -13,21 +32,36 @@
         <!-- codeIssue-head -->
         <div class="codeIssue-head">
           <div class="breadcrumbs">
-              <ul>
-                  <li><a href="/">Home</a></li>
-                  <li><a href="#">{{object.project}}</a></li>
-                  <li><a href="#">{{object.status}}</a></li>
-              </ul>
+            <ul>
+              <li><a href="/">Home</a></li>
+              <li><a href="#">{{object.project}}</a></li>
+              <li><a href="#">{{object.status}}</a></li>
+            </ul>
           </div>
+          <!-- Your share button code -->
+
+          <div class="fb-share-button" data-href="http://coderbounty.com{{object.get_absolute_url}}"
+            data-layout="button_count" data-size="small" data-mobile-iframe="true"></div>
+
+
           <h1>{{ object.title }}</h1>
-          <!-- -->
-          <div class="status">
+          <form action="#" method="post" id="refresh_form">{% csrf_token %}
+            <div class="status">
               <ul>
-                  <li class="id"><strong>#{{ object.number }}</strong> {{object.project}}</li>
-                  <li>Status: <span class="icon-{{object.status|slugify}}"><span> {{object.status}}</span><span></li>
-                  <li>Views: <span class="icon-stats"> <strong>{{object.views}}</strong></span></li>
+                <li class="id"><strong>#{{ object.number }}</strong> {{object.project}}</li>
+                <li>
+                  Status:
+                  <span class="icon-{{object.status|slugify}}">
+                    <span> {{object.status}}</span>
+                  </span>
+                  <a href="javascript:document.getElementById('refresh_form').submit();" title="Refresh">
+                    <span class="icon-loop"></span>
+                  </a>
+                </li>
+                <li>Views: <span class="icon-stats"> <strong>{{object.views}}</strong></span></li>
               </ul>
-          </div>
+            </div>
+          </form>
         </div>
         <!-- codeIssue-content -->
         <div class="codeIssue-content grid">
@@ -35,244 +69,188 @@
           <div class="codeIssue-side col-5">
             <!-- basic -->
             <div class="codeIssue-basic clearfix">
-                <div class="img-holder">
-                    <img src="{% static "images/temp/thumb-medium-00.jpg" %}" alt="" />
-                </div>
-                <div class="text">
-                  <p class="total">Total Bounty: <span>${{ object.bounty }}</span></p>
-                  <form>
-                      <button class="ribbon ribbon-normal ribbon-03 ribbon-brown-dark">add Cash</button>
-                  </form>
-                </div>
-                <div class="clear language">
-                  <table>
-                    <tr>
-                      <td><p>Primary Language:</p></td>
-                      <td><img src="{{STATIC_URL}}images/logos/logo-{{ object.language|slugify }}.png" alt="{{ object.language }}" /></td>
-                    </tr>
-                  </table>
-                </div>
-                <div class="view-ghithub">
-                  <a href="{{object.html_url}}">View this issue on {{object.service.name}}</a>
-                </div>
+              <div class="img-holder">
+                <img src="https://github.com/{{object.user}}.png?size=95" alt="" />
+              </div>
+              <div class="text">
+                <p class="total">Total Bounty: <span>${{ object.bounty }}</span></p>
+                <form action="/post/" method="GET">
+                  <input type="hidden" name="url" value="{{object.html_url}}">
+                  <button class="ribbon ribbon-normal ribbon-03 ribbon-brown-dark">add Cash</button>
+                </form>
+              </div>
+              <div class="clear language">
+                <table>
+                  <tr>
+                    <td>
+                      <p>Primary Language:</p>
+                    </td>
+                    <td><span class="icon-{{issue.language|slugify}}" style="font-size:21px;"></span>{{issue.language}}
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <div class="view-ghithub">
+                <a href="{{object.html_url}}">View this issue on {{object.service.name}}</a>
+              </div>
             </div>
             <!-- frame bounties -->
             <div class="frame frame-light">
-                <div class="frame-content">
-                  <h2 class="titlebar"><span class="ribbon ribbon-normal ribbon-04 ribbon-brown">Bounties</span></h2>
-                  <table class="table-list table-list-leader-board">
-                      <tbody>
-                          {% for bounty in issue.bounties %}
-                          <tr>
-                              <td class="thumb">
-                                  <a class="img-holder" href="/profile/{{bounty.user.username}}"><img alt="" src="{{bounty.user.userprofile.gravatar}}"></a></td>
-                              <td class="text">
-                                  <a href="/profile/{{bounty.user.username}}">{{bounty.user.username}}</a>
-                                  {{ bounty.created }}
-                              </td>
-                              <td class="price">${{bounty.price}}</td>
-                          </tr>
-                          {% endfor %}
-                         
-                      </tbody>
-                  </table>
-                </div>
+              <div class="frame-content">
+                <h2 class="titlebar"><span class="ribbon ribbon-normal ribbon-04 ribbon-brown">Bounties</span></h2>
+                <table class="table-list table-list-leader-board">
+                  <tbody>
+                    {% for bounty in issue.bounties %}
+                    <tr>
+                      <td class="thumb">
+                        <a class="img-holder" href="/profile/{{bounty.user.username}}"><img alt=""
+                            src="{{bounty.user.userprofile.avatar}}"></a>
+                      </td>
+                      <td class="text">
+                        <a href="/profile/{{bounty.user.username}}">{{bounty.user.username}}</a>
+                        {{ bounty.created|date:"m/d/Y"}}
+                      </td>
+                      <td class="price">${{bounty.price}}</td>
+                    </tr>
+                    {% endfor %}
+
+                  </tbody>
+                </table>
+              </div>
             </div>
             <!-- frame watchers -->
             <div class="frame frame-light frame-noLines">
-                <div class="frame-content">
-                  <h2 class="titlebar"><span class="ribbon ribbon-normal ribbon-04 ribbon-brown">Takers</span></h2>
-                  <table class="table-list table-list-leader-board">
-                      <tbody><!--
-                          <tr>
-                              <td class="thumb">
-                                  <a class="img-holder" href="#"><img alt="" src="{% static "images/temp/thumb-05.jpg" %}"></a></td>
-                              <td class="text">
-                                  <a href="#">Adam Smith</a>
-                              </td>
-                          </tr>
-                          <tr>
-                              <td class="thumb">
-                                  <a class="img-holder" href="#"><img alt="" src="{% static "images/temp/thumb-03.jpg" %}"></a></td>
-                              <td class="text">
-                                  <a href="#">Rodger Stone</a>
-                              </td>
-                          </tr>
-                          <tr>
-                              <td class="thumb">
-                                  <a class="img-holder" href="#"><img alt="" src="{% static "images/temp/thumb-04.jpg" %}"></a></td>
-                              <td class="text">
-                                  <a href="#">Tim Novak</a>
-                              </td>
-                          </tr>
-                          <tr>
-                              <td class="thumb">
-                                  <a class="img-holder" href="#"><img alt="" src="{% static "images/temp/thumb-02.jpg" %}"></a></td>
-                              <td class="text">
-                                  <a href="#">Kristin Simmons</a>
-                              </td>
-                          </tr>
-                          <tr>
-                              <td class="thumb">
-                                  <a class="img-holder" href="#"><img alt="" src="{% static "images/temp/thumb-01.jpg" %}"></a></td>
-                              <td class="text">
-                                  <a href="#">Fill Jones</a>
-                              </td>
-                          </tr>-->
-                      </tbody>
-                  </table>
-                  <form class="center">
-                    <button class="ribbon ribbon-normal ribbon-03 ribbon-green">take this bounty</button>
-                  </form>
-                </div>
+              <div class="frame-content">
+                <h2 class="titlebar"><span class="ribbon ribbon-normal ribbon-04 ribbon-brown">Takers</span></h2>
+                <table class="table-list table-list-leader-board" id="takers">
+                  <tbody>
+                    {% for taker_item in takers %}
+                    <tr>
+                      <td class="thumb">
+                        <a class="img-holder" href="/profile/{{taker_item.user.username}}"><img alt=""
+                            src="{{taker_item.user.userprofile.avatar}}"></a>
+                      </td>
+                      <td class="text">
+                        <a href="/profile/{{taker_item.user.username}}">{{taker_item.user.username}}</a>
+                        {{ taker_item.created|date:"m/d/Y" }}
+                      </td>
+                      <td class="price">
+                        {% if taker_item.user == issue.winner %}
+                        <img src="{% static 'images/layout/money_bag.png' %}">
+                        {% else %}
+                        {% if taker_item.expired %}
+                        <img src="{% static 'images/layout/bullet_hole.png' %}">
+                        {% else %}
+                        <i class="icon-clock"></i>
+                        {% endif %}
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+                {% if not taker and not issue.winner %}
+                <form class="center" action="#" method="post">{% csrf_token %}
+                  <button class="ribbon ribbon-normal ribbon-03 ribbon-green" name="take" value="take">take this
+                    bounty</button>
+                </form>
+                {% endif %}
+              </div>
             </div>
           </div>
           <!-- codeIssue-main -->
           <div class="codeIssue-main col-10">
             <div class="codeIssue-description">
-                <!-- text -->
-                <div class="text"><p>{{ object.content }}.</p></div>
-                <!-- buttons -->
-                <div class="button-wrapper clearfix">
-                  <form>
-                    <button class="ribbon ribbon-large ribbon-03">Take</button>
-                    <button class="ribbon ribbon-normal ribbon-03 ribbon-brown">Share</button>
-                  </form>
-                </div>
+              <!-- text -->
+              <div class="text">
+                <p>{{ object.content }}.</p>
+              </div>
+              <!-- buttons -->
+              <div class="button-wrapper clearfix">
+                {% if not taker and not issue.winner %}
+                <form action="#" method="post">{% csrf_token %}
+                  <button id="takeBounty" class="ribbon ribbon-large ribbon-03" name="take" value="take">Take</button>
+                </form>
+                {% endif %}
+              </div>
             </div>
-            {% comment "Hide comments until they are integrated" %}
-            <!-- comments -->
+            {% if issue.winner %}
+            <div class="img-holder" style="width: 100%; text-align:center;">
+              <img width="250px" src="{{issue.winner.userprofile.avatar_large}}" alt="" />
+            </div>
+            <div class="codeIssueTaker frame">
+
+              <h1 class="titlebar-paper ">
+                <span style="font-size:20px;">
+                  Winner: {{issue.winner}}</br></span>
+                </span>
+              </h1>
+              </br></br></br>
+            </div>
+
+            {% elif taker %}
+            <div class="img-holder" style="width: 100%; text-align:center;">
+              <img width="250px" src="{{taker.user.userprofile.avatar_large}}" alt="" />
+            </div>
+            <div class="codeIssueTaker frame">
+
+              <h1 class="titlebar-paper ">
+                <span style="font-size:20px;">
+                  Taken by: {{taker.user}}</br>
+                  <div id="timer">{{taker.time_remaining}}
+                </span>
+                </span>
+              </h1>
+              <script>
+                startTimer("{{taker.time_remaining_seconds}}", document.querySelector('#timer'));
+              </script>
+              </br></br></br>
+              {% if object.status != "in review" %}
+              <form action="#" method="post" id="post_pull_request_url">
+                {% csrf_token %}
+                <div class="value" style="width:100%; text-align:center;">
+                  <input type="text" id="solution" name="solution" autocomplete="off"
+                    placeholder="Enter url of pull request or commit" value="">
+                  </br></br>
+                  <button class="ribbon ribbon-normal ribbon-03 ribbon-brown-dark">Submit Solution</button>
+                </div>
+              </form>
+              {% endif %}
+            </div>
+            {% endif %}
+            {% if object.comment_set.count %}
             <div class="comments">
-              <!-- comments count -->
               <div class="comments-count clearfix">
-                <span>20,203</span> comments
-                <a class="add" href="#">Add a comment</a>
+                <span>{{ object.comment_set.count }}</span> comments
               </div>
-              <!-- comments main -->
               <div class="comments-main">
-                <!-- item-content -->
+                {% for comment in object.comment_set.all %}
                 <div class="item-comment clearfix">
                   <!-- text -->
                   <div class="text">
-                    <div class="img-holder">
-                      <img src="{% static "images/temp/thumb-medium-00.jpg" %}" alt="" />
+                    <a href="{% url 'profile' comment.username %}">
+                      <div class="img-holder">
+                        <img src="https://github.com/{{comment.username}}.png?size=75" alt=""
+                          onerror='this.src="/static/images/temp/thumb-medium-00.jpg";' />
+                      </div>
+                    </a>
+                    <a href="{% url 'profile' comment.username %}">
+                      <div class="user"><strong>{{ comment.username }}</strong></div>
+                    </a>
+                    <div class="description">
+                      <p>{{ comment.content | urlize }}</p>
                     </div>
-                    <div class="user"><strong>davis234@hotmail.com</strong></div>
-                    <div class="description"><p>Hey guys... I implemented facebook comments on my site, you can have a look: http://freemoviepublic.com Btw, it's a site to watch movies for free...</p></div>
                   </div>
-                  <!-- actionbar -->
                   <div class="actionbar">
                     <ul>
-                      <li><a href="#"><strong>Reply</strong></a></li>
-                      <li><a href="#"><span class="icon-thumbs-up2"></span>190</a></li>
-                      <li><a href="#">Like</a></li>
-                      <li><em>October 24th at 10:34pm</em></li>
+                      <li><em>{{ comment.updated|date }}</em></li>
                     </ul>
                   </div>
-                  <!-- item-content -->
-                  <div class="item-comment clearfix">
-                    <!-- text -->
-                    <div class="text">
-                      <div class="img-holder">
-                        <img src="{% static "images/temp/thumb-medium-00.jpg" %}" alt="" />
-                      </div>
-                      <div class="user"><strong>Test User</strong></div>
-                      <div class="description"><p>Nice one... I just looked at coderbounty.com good implemetation there...</p></div>
-                    </div>
-                    <!-- actionbar -->
-                    <div class="actionbar">
-                      <ul>
-                        <li><a href="#"><strong>Reply</strong></a></li>
-                        <li><a href="#"><span class="icon-thumbs-up2"></span>190</a></li>
-                        <li><a href="#">Like</a></li>
-                        <li><em>October 24th at 10:34pm</em></li>
-                      </ul>
-                    </div>
-                  </div>
-                  <!-- item-content -->
-                  <div class="item-comment clearfix">
-                    <!-- text -->
-                    <div class="text">
-                      <div class="img-holder">
-                        <img src="{% static "images/temp/thumb-medium-00.jpg" %}" alt="" />
-                      </div>
-                      <div class="user"><strong>Test User</strong></div>
-                      <div class="description"><p>Nice one... I just looked at coderbounty.com good implemetation there...</p></div>
-                    </div>
-                    <!-- actionbar -->
-                    <div class="actionbar">
-                      <ul>
-                        <li><a href="#"><strong>Reply</strong></a></li>
-                        <li><a href="#"><span class="icon-thumbs-up2"></span>190</a></li>
-                        <li><a href="#">Like</a></li>
-                        <li><em>October 24th at 10:34pm</em></li>
-                      </ul>
-                    </div>
-                  </div>
-                  <!-- item-content -->
-                  <div class="item-comment clearfix">
-                    <!-- text -->
-                    <div class="text">
-                      <div class="img-holder">
-                        <img src="{% static "images/temp/thumb-medium-00.jpg" %}" alt="" />
-                      </div>
-                      <div class="user"><strong>Test User</strong></div>
-                      <div class="description"><p>Nice one... I just looked at coderbounty.com good implemetation there...</p></div>
-                    </div>
-                    <!-- actionbar -->
-                    <div class="actionbar">
-                      <ul>
-                        <li><a href="#"><strong>Reply</strong></a></li>
-                        <li><a href="#"><span class="icon-thumbs-up2"></span>190</a></li>
-                        <li><a href="#">Like</a></li>
-                        <li><em>October 24th at 10:34pm</em></li>
-                      </ul>
-                    </div>
-                  </div>
                 </div>
-                <!-- item-content -->
-                <div class="item-comment clearfix">
-                  <!-- text -->
-                  <div class="text">
-                    <div class="img-holder">
-                      <img src="{% static "images/temp/thumb-medium-00.jpg" %}" alt="" />
-                    </div>
-                    <div class="user"><strong>Test User</strong></div>
-                    <div class="description"><p>Nice one... I just looked at coderbounty.com good implemetation there...</p></div>
-                  </div>
-                  <!-- actionbar -->
-                  <div class="actionbar">
-                    <ul>
-                      <li><a href="#"><strong>Reply</strong></a></li>
-                      <li><a href="#"><span class="icon-thumbs-up2"></span>190</a></li>
-                      <li><a href="#">Like</a></li>
-                      <li><em>October 24th at 10:34pm</em></li>
-                    </ul>
-                  </div>
-                  <!-- item-content -->
-                  <div class="item-comment clearfix">
-                    <!-- text -->
-                    <div class="text">
-                      <div class="img-holder">
-                        <img src="{% static "images/temp/thumb-medium-00.jpg" %}" alt="" />
-                      </div>
-                      <div class="user"><strong>Test User</strong></div>
-                      <div class="description"><p>Nice one... I just looked at coderbounty.com good implemetation there...</p></div>
-                    </div>
-                    <!-- actionbar -->
-                    <div class="actionbar">
-                      <ul>
-                        <li><a href="#"><strong>Reply</strong></a></li>
-                        <li><a href="#"><span class="icon-thumbs-up2"></span>190</a></li>
-                        <li><a href="#">Like</a></li>
-                        <li><em>October 24th at 10:34pm</em></li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
+                {% endfor %}
               </div>
             </div>
-            {% endcomment %}
+            {% endif %}
           </div>
         </div>
       </div>
@@ -280,76 +258,53 @@
       <div class="side col-5">
         <!-- frame - top 20 -->
         <div class="frame frame-dark">
-            <div class="frame-content">
-                <h2 class="titlebar"><span class="ribbon ribbon-normal ribbon-04 ribbon-brown-dark">{% now "F" %} top 5</span></h2>
-                <table class="table-list table-list-leader-board">
-                    <tbody>
-                      {% for leader in leaderboard %}
-                          <tr>
-                              <td class="thumb">
-                                  <a href="/profile/{{ leader.username }}" class="img-holder"><img src="{{ leader.userprofile.gravatar }}" alt="" /></a></td>
-                              <td class="text">
-                                  <a href="/profile/{{ leader.username }}">{{ leader.username}}</a>
-                              </td>
-                              <td class="price">${{ leader.userprofile.balance}}</td>
-                          </tr>
-                      {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+          <div class="frame-content">
+            <h2 class="titlebar"><span class="ribbon ribbon-normal ribbon-04 ribbon-brown-dark">{% now "F" %} top
+                10</span></h2>
+            <table class="table-list table-list-leader-board">
+              <tbody>
+                {% for leader in leaderboard %}
+                <tr>
+                  <td class="thumb">
+                    <a href="/profile/{{ leader.username }}" class="img-holder"><img
+                        src="{{ leader.userprofile.avatar }}" alt="" /></a>
+                  </td>
+                  <td class="text">
+                    <a href="/profile/{{ leader.username }}">{{ leader.username}}</a>
+                  </td>
+                  <td class="price">${{ leader.userprofile.bounties_won}}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
-        <!-- frame - accepted by 
-        <div class="frame frame-light frame-noLines">
-            <div class="frame-content">
-                <h2 class="titlebar"><span class="ribbon ribbon-normal ribbon-04 ribbon-brown">Accepted by</span></h2>
-                <table class="table-list table-list-leader-board">
-                    <tbody>
-                        <tr>
-                            <td class="thumb">
-                                <a class="img-holder" href="#"><img alt="" src="{% static "images/temp/thumb-03.jpg" %}"></a></td>
-                            <td class="text">
-                                <a href="#">Adam Smith</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="thumb">
-                                <a class="img-holder" href="#"><img alt="" src="{% static "images/temp/thumb-02.jpg" %}"></a></td>
-                            <td class="text">
-                                <a href="#">Rodger Stone</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="thumb">
-                                <a class="img-holder" href="#"><img alt="" src="{% static "images/temp/thumb-01.jpg" %}"></a></td>
-                            <td class="text">
-                                <a href="#">Tim Novak</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="thumb">
-                                <a class="img-holder" href="#"><img alt="" src="{% static "images/temp/thumb-05.jpg" %}"></a></td>
-                            <td class="text">
-                                <a href="#">Kristin Simmons</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="thumb">
-                                <a class="img-holder" href="#"><img alt="" src="{% static "images/temp/thumb-04.jpg" %}"></a></td>
-                            <td class="text">
-                                <a href="#">Fill Jones</a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        -->
-        <!-- frame - word cloud -->
-        <div class="frame frame-light">
-            <div class="frame-content">
-                <h2 class="titlebar"><span class="ribbon ribbon-normal ribbon-04 ribbon-brown">Word cloud</span></h2>
 
-            </div>
+        <div class="frame frame-light">
+          <div class="frame-content">
+            <h2 class="titlebar"><span class="ribbon ribbon-normal ribbon-04 ribbon-brown">Solutions</span></h2>
+
+            <table class="table-list table-list-leader-board">
+              <tbody>
+                {% for solution in solutions %}
+                <tr>
+                  <td class="thumb">
+                    <a href="/profile/{{ solution.user.username }}" class="img-holder"><img
+                        src="{{ solution.user.userprofile.avatar }}" alt="" /></a>
+                  </td>
+                  <td class="text">
+                    <a href="/profile/{{ solution.user.username }}">{{ solution.user.username}}</a></br>
+                    <a href="{{solution.url}}" target="_new">{{ solution.status}}</a>
+                    {% if solution.status != "paid" %}
+                    <a href="/pay/{{solution.id}}" target="_new">pay</a>
+                    {% endif %}
+                  </td>
+                  <td class="price"><a href="{{solution.url}}" target="_new"> #{{solution.id}}</a></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+
+<script src="{% static 'js/jquery.liveurl.js' %}"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<style>
+    .ui-slider-horizontal .ui-state-default {
+        background: url({{STATIC_URL}}images/slider-circle.png);
+        border: 0px;
+        height: 17px;
+        width: 18px;
+    }
+
+
+    .ui-slider-horizontal,
+    .ui-slider-range {
+        width: 478px;
+        left: 181px;
+        top: -29px;
+        height: 10px;
+
+        border-width: 1px;
+        -moz-border-image: -moz-linear-gradient(left, #C2B7A5 0%, #807362 50%, #B1816D 100%) 30 round;
+        -webkit-border-image: -webkit-linear-gradient(left, #C2B7A5 0%, #807362 50%, #B1816D 100%) 30 round;
+        border-image: linear-gradient(to right, #C2B7A5 0%, #807362 50%, #B1816D 100%) 30 round;
+
+        border-image-slice: 1;
+        background: #5e9ae2;
+        /* Old browsers */
+        background: -moz-linear-gradient(left, #B3A896 0%, #463627 50%, #A34B33 100%) !important;
+        /* FireFox 3.6+ */
+        background: -webkit-gradient(linear, left top, right top, color-stop(0%, #B3A896), color-stop(50%, #463627), color-stop(100%, #A34B33));
+        /* Chrome, Safari 4+ */
+        background: -webkit-linear-gradient(left, #B3A896 0%, #463627 50%, #A34B33 100%);
+        /* Chrome 10+, Safari 5.1+ */
+        background: -o-linear-gradient(left, #B3A896 0%, #463627 50%, #A34B33 100%);
+        /* Opera 11.10+ */
+        background: -ms-linear-gradient(left, #B3A896 0%, #463627 50%, #A34B33 100%);
+        /* IE 10+ */
+        background: linear-gradient(left, #B3A896 0%, #463627 50%, #A34B33 100%);
+        /* W3C */
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=’#B3A896, endColorstr=’#A34B33, GradientType=1);
+        /* IE 6-9 */
+    }
+
+    #fee {
+        left: 38px;
+        top: 13px;
+        position: relative;
+        font-weight: bold;
+    }
+
+    #slide {
+        color: #8C816F;
+        left: 341px;
+        top: -3px;
+        position: relative;
+        font-weight: bold;
+    }
+</style>
+<script>
+
+    // console.log('test');
+
+    $(document).ready(function () {
+
+        $('#issueUrl').liveUrl({
+            success: function (data) {
+                $.post("/parse_url_ajax/", {
+                    url: data['url'],
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                }).done(function (data) {
+                    var issue = jQuery.parseJSON(data)
+                    $('#title').val(issue['title']);
+                    $('#content').val(issue['content']);
+                });
+            }
+        });
+
+        $("#price").on('input', function (e) {
+            $("#fee_amt").html(Math.round($("#price").val() * .10));
+            $("#total").html(Math.round(parseInt($("#fee_amt").html()) + parseInt($("#price").val())));
+            $("#grand_total").val($("#total").html());
+        });
+
+    });
+
+    $(function () {
+        $("#slider").slider({
+            range: "min",
+            value: 20,
+            min: 5,
+            max: 5000,
+            slide: function (event, ui) {
+                $("#price").val(ui.value);
+                $("#fee_amt").html(Math.round(ui.value * .10));
+                $("#total").html(Math.round(parseInt($("#fee_amt").html()) + parseInt($("#price").val())));
+                $("#grand_total").val($("#total").html());
+            }
+        });
+    });
+
+
+
+</script>
+<!-- Section - Post a Bounty -->
+<div class="section-postBounty wrapper-section">
+    <div class="wrapper-global grid">
+        <div class="col-20">
+            <section class="frame frame-dark-paper">
+                <span class="bugfix-top"></span>
+                <div class="frame-content">
+                    <h1 class="titlebar-paper"><span>Po$t a Bounty</span></h1>
+                    <form action="{% url 'post' %}" method="post" id="post_bounty">
+                        <input type="hidden" name="grand_total" id="grand_total" value="22">
+                        {% csrf_token %}
+                        <div class="grid">
+                            <!-- bounty-post -->
+                            <div class="col-15 bounty-post form-layout form-layout-horizontal">
+                                <!-- -->
+                                <div class="form-item">
+                                    {% if message %}<p>&nbsp;&nbsp;&nbsp;<strong>{{ message }}</strong></p>{% endif %}
+
+
+                                </div>
+                                <!-- -->
+                                <div class="form-item">
+                                    <p class="label">Issue Tracker:</p>
+                                    <div class="value">
+                                        <span class="custom-radiobutton"><input type="radio" id="rbtnGithub"
+                                                name="issuetracker" value="Github" checked /></span>
+                                        <label for="rbtnGithub" class="label-github">GitHub</label>
+                                        <span class="custom-radiobutton"><input type="radio" id="rbtnBitbucket"
+                                                name="issuetracker" value="Bitbucket" /></span>
+                                        <label for="rbtnBitbucket" class="label-bitbucket">Bitbucket</label>
+                                        <!--
+                                            <span class="custom-radiobutton"><input type="radio" id="rbtnOther" name="issuetracker" /></span>
+                                            <label for="rbtnOther">Other</label>
+                                            -->
+                                    </div>
+                                </div>
+                                <!-- -->
+                                <div class="form-item">
+                                    <label class="label" for="issueUrl">Issue URL:</label>
+                                    <div class="value">
+                                        <input type="text" id="issueUrl" name="issueUrl" autocomplete="off"
+                                            placeholder="Paste a link to an issue and we'll fill out the rest"
+                                            value="{{form.issueUrl.value|default:''}}" />
+
+                                    </div>
+                                </div>
+                                <!-- -->
+                                <div class="form-item">
+                                    <label class="label" for="title">Title:</label>
+                                    <div class="value">
+                                        <input type="text" id="title" name="title"
+                                            value="{{form.title.value|default:''}}" />
+                                        {% for error_field,error_value in errors.items %} 
+                                        {% if error_field == 'title' %} {{ error_value }} 
+                                        {% endif %} {% endfor %}
+                                    </div>
+                                </div>
+                                <!-- -->
+                                <div class="form-item">
+                                    <label class="label" for="content">Summary:</label>
+                                    <div class="vlaue">
+                                        <textarea id="content"
+                                            name="content">{{form.content.value|default:''}}</textarea>
+                                        {% for error_field,error_value in errors.items %} 
+                                        {% if error_field == 'content' %} {{ error_value }} 
+                                        {% endif %} {% endfor %}
+                                    </div>
+                                </div>
+                                <!-- -->
+                                <div class="form-item form-short">
+                                    <label class="label" for="language">Language:</label>
+                                    <div class="value">
+                                        <select id="language" name="language">
+                                            {% for language in languages %}
+                                            <option>{{ language }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- -->
+                                <div class="form-item form-short">
+                                    <label class="label" for="price">Bounty $:</label>
+
+                                    <div class="value">
+                                        <input type="text" id="price" name="price" pattern="^[0-9]*$" value="20" />
+                                        <div id="slider"></div>
+
+                                        {% for error_field,error_value in bounty_errors.items %} {{ error_value }} 
+                                        {% endfor %}
+
+                                    </div>
+                                    <div id="fee">Coderbounty's fee: $<span id="fee_amt">2</span></div>
+                                    <span id="slide">(Slide to increase bounty)</span>
+
+                                </div>
+                            </div>
+
+                            <div class="col-4 bounty-info">
+                                <h2>Project Title<a href="#">view all issues</a></h2>
+                                <a class="avatar" href="#"><img src="{% static 'images/temp/thumb-medium-00.jpg' %}"
+                                        alt="" /></a>
+                                <div class="bounty-info-add-image">
+                                    <div class="arrow">
+                                        <a class="icon-uniE65C" href="#"></a>
+                                        <a class="icon-uniE63C" href="#"></a>
+                                    </div>
+                                    <a class="add-img" href="#">add image from url</a>
+                                </div>
+                            </div>
+                            -->
+                        </div>
+
+                        <div class="bounty-submit clearfix">
+
+                            <div class="notice">
+                                <p>Bounties are posted until the issue is closed, and then it goes to the developer who
+                                    closed the issue. You can withdraw your bounty at anytime for a 3% fee.</p>
+                            </div>
+                            <div class="price">Total: <span>$<span id="total">22</span></span></div>
+                            <div class="button-wrapper"><button class="ribbon ribbon-large ribbon-03">Pay Now</button>
+                            </div>
+                            <div class="symbol-wrapper">
+                                <div class="symbol-secure"><span class="icon-lock"></span> Coderbounty uses 1024 bit
+                                    encryption for secure transactions</div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <span class="bugfix-bottom"></span>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}

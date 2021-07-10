@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<script src="{% static 'js/all.js' %}"></script>
+
+<!-- Section - Repositories -->
+<div class="section-issues clearfix wrapper-global">
+    <!-- headbar -->
+    <div class="headbar frame listing">
+        <h1>Repositories</h1>
+        <div class="list-filter-buttons">
+            <div>
+                <button class="ribbon ribbon-normal ribbon-green ribbon-02" onclick="">List</button>
+                <button class="ribbon ribbon-normal ribbon-green ribbon-02" onclick="">Grid</button>
+            </div>
+        </div>
+
+        <table class="list-table-header">
+            <tbody>
+                <tr>
+                    <th class="list-table-header-repository">Repository</th>
+                    <th class="list-table-header-issues"># of issues</th>
+                    <th class="list-table-header-bounty">Total bounty</th>
+                    <th class="list-table-header-languages">Programming Language(s)</th>
+                    <th class="list-table-header-coverage">Bounty Coverage</th>
+                    <th class="list-table-header-contributors">Top contributors</th>
+                </tr>
+            </tbody>
+        </table>
+        <hr class="list-hr">
+
+        <div class="organisation-list">
+            <section class="frame frame-light">
+                <div class="frame-content">
+                    <table class="organisation-list-table">
+                        <tbody>1
+                            {% for repository in repositories %}
+                            <tr class="organisation-list-row">
+                                <td class="list-table-repository">
+                                    <img src="" class="list-table-image">
+                                </td>
+                                <td class="list-table-issues">{}</td>
+                                <td class="list-table-bounty">$ {}</td>
+                                <td class="list-table-repo-languages">{}</td>
+                                <td class="list-table-coverage">{}</td>
+                                <td class="list-table-contributors">
+                                    {% for contributor in contributors %}
+                                    <img src="" class="list-table-image">
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}

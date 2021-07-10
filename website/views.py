@@ -1,412 +1,295 @@
-from django.shortcuts import render_to_response, RequestContext, redirect, get_object_or_404
-from django.http import HttpResponseNotFound, HttpResponseServerError, HttpResponse
-from django.core.mail import send_mail
-from django.conf import settings
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
-from models import Issue, UserProfile, Bounty, Service
 from .forms import IssueCreateForm, BountyCreateForm, UserProfileForm
-from utils import get_issue, add_issue_to_database, get_twitter_count, get_facebook_count, create_comment, issue_counts, leaderboard, get_hexdigest
-
-from django.views.generic import ListView, DetailView, FormView
-from django.views.generic.edit import UpdateView
-from django.contrib.auth import get_user_model
-
-from django.core import serializers
-from django.shortcuts import get_object_or_404, render
-
-from wepay import WePay
-
-import json
+from actstream import action
+from actstream.models import Action, user_stream
+from django.conf import settings
 from django.contrib import messages
-from django.db.models import Q
-import re
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.contrib.auth.models import User
+from django.contrib.messages.views import SuccessMessageMixin
+from django.core import serializers
+from django.urls import reverse
+
+from django.core.mail import send_mail
+from django.db.models import Count
+from django.http import HttpResponse
+from django.shortcuts import redirect, render
+from django.views.generic import ListView, DetailView, FormView, TemplateView, View
+from django.views.generic.edit import UpdateView
+from django.views.generic.detail import SingleObjectMixin
+from .models import Issue, UserProfile, Bounty, Service, Taker, Solution, Payment
+from .utils import (
+    get_issue_helper,
+    leaderboard,
+    post_to_slack,
+    submit_issue_taker,
+    get_comment_helper,
+    create_comment,
+)
+from wepay import WePay
+from time import strftime
 import datetime
-from django.db.models import Sum, Count
-from django.contrib.sites.models import Site
-import urllib
-import urllib2
-import cookielib
+import json
 
-from BeautifulSoup import BeautifulSoup
-import string
-import random
-from actstream.models import user_stream
-from actstream.models import Action
+from allauth.socialaccount.models import (
+    SocialToken,
+    SocialApp,
+    SocialAccount,
+    SocialLogin,
+)
+import requests
+from django.http import Http404
+from django.views.decorators.cache import cache_page
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.template.loader import render_to_string
+from django.db.models import Sum
 
-
-from django.core.urlresolvers import reverse
 
 def parse_url_ajax(request):
-     url = request.POST.get('url', '')
-     issue = get_issue(request, url)
-     return HttpResponse(json.dumps(issue))
+    url = request.POST.get("url", "https://github.com/twbs/bootstrap/issues/21814")
+    helper = get_issue_helper(request, url)
+    issue = helper.get_issue(request, url)
+    return HttpResponse(json.dumps(issue))
 
+
+# @cache_page(432000) #5 days
 def home(request, template="index.html"):
     activities = Action.objects.all()[0:10]
     context = {
-        'activities': activities,
-        'leaderboard': leaderboard(),
+        "activities": activities,
+        "leaderboard": leaderboard(),
     }
-    response = render_to_response(template, context, context_instance=RequestContext(request))
+    response = render(request, template, context)
     return response
 
 
+@login_required
 def create_issue_and_bounty(request):
     languages = []
     for lang in Issue.LANGUAGES:
         languages.append(lang[0])
     user = request.user
-    if not user.is_authenticated():
-        return render(request, 'post.html', {
-            'languages': languages,
-            'message': 'You need to be authenticated to post bounty'
-        })
-    if request.method == 'GET':
-        return render(request, 'post.html', {
-            'languages': languages,
-        })
-    if request.method == 'POST':
-        url = request.POST.get('issueUrl','')
-        if not url:
-            messages.error(request, 'Please provide an issue url')
-            return render(request, 'post.html', {
-                'languages': languages
-            })
-        issue_data = get_issue(request, url)
-        if issue_data:
-            service = Service.objects.get(name=issue_data['service'])
-            instance = Issue(created = user,number = issue_data['number'],
-            project=issue_data['project'],user = issue_data['user'],service=service)
+
+    if request.method == "GET":
+        url = request.GET.get("url")
+        if url:
+            helper = get_issue_helper(request, url)
+            issue_data = helper.get_issue(request, url)
+
+            if not "title" in issue_data:
+                messages.error(request, "Please provide an valid issue url")
+                return redirect("/post")
+
+            form = IssueCreateForm(
+                initial={
+                    "issueUrl": request.GET.get("url"),
+                    "title": issue_data["title"],
+                    "content": issue_data["content"] or "Added from Github",
+                }
+            )
         else:
-            return render(request, 'post.html', {
-                'languages': languages,
-                'message':'Please provide a propper issue url',
-            })
-        form = IssueCreateForm(request.POST, instance=instance)
+            form = IssueCreateForm()
+        return render(
+            request,
+            "post.html",
+            {
+                "languages": languages,
+                "form": form,
+            },
+        )
+    if request.method == "POST":
+        url = request.POST.get("issueUrl", "")
+        if not url:
+            messages.error(request, "Please provide an issue url")
+            return render(request, "post.html", {"languages": languages})
+        try:
+            helper = get_issue_helper(request, url)
+            issue_data = helper.get_issue(request, url)
+            service = Service.objects.get(name=issue_data["service"])
+            instance = Issue(
+                number=issue_data["number"],
+                project=issue_data["project"],
+                user=issue_data["user"],
+                service=service,
+            )
+            form = IssueCreateForm(request.POST, instance=instance)
+
+        except Exception as e:
+            return render(
+                request,
+                "post.html",
+                {
+                    "languages": languages,
+                    "message": "Error: " + str(e),
+                },
+            )
+
         bounty_form = BountyCreateForm(request.POST)
         bounty_form_is_valid = bounty_form.is_valid()
         if form.is_valid() and bounty_form_is_valid:
-            if not instance.pk: 
+            price = bounty_form.cleaned_data["price"]
+            if int(price) < 5:
+                return render(
+                    request,
+                    "post.html",
+                    {
+                        "languages": languages,
+                        "message": "Bounty must be greater than $5",
+                    },
+                )
+            try:
                 issue = form.save()
+            except:
+                issue = Issue.objects.get(
+                    number=issue_data["number"],
+                    project=issue_data["project"],
+                    user=issue_data["user"],
+                    service=service,
+                )
+
+            bounty_instance = Bounty(user=user, issue=issue, price=price)
+            if int(request.user.userprofile.balance or 0) >= int(
+                request.POST.get("grand_total")
+            ):
+                profile = request.user.userprofile
+                profile.balance = int(request.user.userprofile.balance) - int(
+                    request.POST.get("grand_total")
+                )
+                profile.save()
+                bounty_instance.save()
+                if not settings.DEBUG:
+                    create_comment(issue)
+                return redirect(issue.get_absolute_url())
             else:
-                issue = instance
-                #issue already exists, post additional bounty
-                #this doesn't seem to be working yet
-            price = bounty_form.cleaned_data['price']
-            bounty_instance = Bounty(user = user,issue = issue,price = price)
-            #save this data and post it with the return_uri from wepay
-            data = serializers.serialize('xml', [ bounty_instance, ])
-            bounty_instance.save()
+                data = serializers.serialize(
+                    "json",
+                    [
+                        bounty_instance,
+                    ],
+                )
+                # https://devtools-paypal.com/guide/pay_paypal/python?env=sandbox
+                import paypalrestsdk
 
-            wepay = WePay(settings.WEPAY_IN_PRODUCTION, settings.WEPAY_ACCESS_TOKEN)
-            wepay_data = wepay.call('/checkout/create', {
-                'account_id': settings.WEPAY_ACCOUNT_ID,
-                'amount': request.POST.get('grand_total'),
-                'short_description': 'CoderBounty',
-                'long_description': data,
-                'type': 'service',
-                'currency': 'USD'
-            })
-            print wepay_data
+                paypalrestsdk.configure(
+                    {
+                        "mode": settings.MODE,
+                        "client_id": settings.CLIENT_ID,
+                        "client_secret": settings.CLIENT_SECRET,
+                    }
+                )
 
-            #return redirect(wepay_data['checkout_uri'])
+                payment = paypalrestsdk.Payment(
+                    {
+                        "intent": "sale",
+                        "payer": {"payment_method": "paypal"},
+                        "redirect_urls": {
+                            "return_url": request.build_absolute_uri(
+                                issue.get_absolute_url()
+                            ),
+                            "cancel_url": "https://coderbounty.com/post",
+                        },
+                        "transactions": [
+                            {
+                                "amount": {
+                                    "total": request.POST.get("grand_total"),
+                                    "currency": "USD",
+                                },
+                                "description": "Coderbounty #" + str(issue.id),
+                                "custom": data,
+                            }
+                        ],
+                    }
+                )
 
-            return render(request, 'post.html', {
-                'languages': languages,
-                'message':'Successfully saved issue'
-            })
+                if payment.create():
+                    for link in payment.links:
+                        if link.method == "REDIRECT":
+                            redirect_url = link.href
+                    return redirect(redirect_url)
+                else:
+                    messages.error(request, payment.error)
+                    return render(request, "post.html", {"languages": languages})
+
         else:
-            return render(request, 'post.html', {
-                'languages': languages,
-                'message':'Error',
-                'errors': form.errors,
-                'bounty_errors':bounty_form.errors,
-            })
+            return render(
+                request,
+                "post.html",
+                {
+                    "languages": languages,
+                    "message": form.errors,
+                    "errors": form.errors,
+                    "form": form,
+                    "bounty_errors": bounty_form.errors,
+                },
+            )
 
 
 def list(request):
-    # q=''
-    # status=''
-    # order='-bounty'
-    # if q:
-    #     entry_query = get_query(q.strip(), ['title', 'content', 'project', 'number', ])
-    #     issues = Issue.objects.filter(entry_query)
-    # else:
-    
-    issues = Issue.objects.all().order_by('-created')
+    status = request.GET.get("status", "open")
+    language = request.GET.get("language")
+    sort = request.GET.get("sort", "-created")
+    layout = request.GET.get("layout", "grid")
 
-    # if status and status != "all":
-    #     issues = issues.filter(status=status)
+    if sort not in ["-created", "-bounty", "-views", "-modified"]:
+        messages.error(request, "invalid sort option")
+        return redirect("/list")
 
-    # if status == "open" or status == '' or status == None:
-    #     issues = issues.filter(bounty__ends__gt=datetime.datetime.now())
+    if not any(language in lang for lang in Issue.LANGUAGES) and language:
+        messages.error(request, "invalid language")
+        return redirect("/list")
 
-    # if order.find('bounty') > -1:
-    #     issues = issues.annotate(bounty_sum=Sum('bounty__price')).order_by(order + '_sum')
+    if not any(status in stat for stat in Issue.STATUS_CHOICES) and status != "all":
+        messages.error(request, "invalid status")
+        return redirect("/list")
 
-    # if order.find('watchers') > -1:
-    #     issues = issues.annotate(watchers_count=Count('watcher')).order_by(order + '_count')
+    if status == "all":
+        issues = Issue.objects.all().order_by(sort)
+    else:
+        issues = Issue.objects.filter(status=status).order_by(sort)
 
-    # if order.find('project') > -1:
-    #     issues = issues.annotate(Count('id')).order_by(order)
+    if language:
+        issues = issues.filter(language=language)
 
-    # if order.find('number') > -1:
-    #     issues = issues.annotate(Count('id')).order_by(order)
+    languages = []
+    for lang in Issue.LANGUAGES:
+        languages.append(lang[0])
 
     context = {
-         'issues': issues,
+        "issues": issues,
+        "language": language,
+        "languages": languages,
+        "status": status,
+        "sort": sort,
+        "layout": layout,
     }
-    response = render_to_response('list.html', context, context_instance=RequestContext(request))
+    if layout == "grid":
+        response = render(request, "list.html", context)
+    else:
+        response = render(request, "newlist.html", context)
     return response
 
 
-# #@ajax_login_required
-# def add(request):
-#     message = ''
-#     url = ''
-#     error = ''
-#     checkout_uri = ''
-
-#     if not request.GET.get('bounty', None):
-#         error = "Please enter a bounty"
-#     if not request.GET.get('limit', None):
-#         error = "Please enter a time limit"
-#     if not request.GET.get('url', None):
-#         error = "Please enter a Github, Google Code or Bitbucket issue"
-
-#     if error:
-#         if request.is_ajax():
-#             return HttpResponse(error)
-#         else:
-#             messages.error(request, error)
-#             return redirect('/')
-
-#     url = request.GET.get('url', None)
-#     issue = get_issue(request, url)
-
-#     if issue and issue['status'] == "open":
-#         issue['bounty'] = int(request.GET.get('bounty', 0))
-#         issue['limit'] = request.GET.get('limit', 0)
-#         request.session['issue'] = issue
-#         if request.user.get_profile().balance and (int(request.user.get_profile().balance) > int(request.GET.get('bounty', 0))):
-#             if add_issue_to_database(request):
-#                 user_profile = UserProfile.objects.get(user=request.user)
-#                 user_profile.balance = int(user_profile.balance) - int(request.GET.get('bounty', 0))
-#                 request.user.get_profile().balance = user_profile.balance
-#                 user_profile.save()
-#                 message = "<span style='color: #8DC63F; font-weight:bold;'>$"\
-#                     + request.GET.get('bounty', 0) + " <span style='color:#4B4B4B'>bounty added to issue </span><strong>#"\
-#                     + str(issue['number']) + "</strong>"
-#                 messages.add_message(request, messages.SUCCESS, message)
-
-#         else:
-#             try:
-#                 wepay = WePay(production=settings.IN_PRODUCTION, access_token=settings.WEPAY_ACCESS_TOKEN)
-
-#                 ctx = {
-#                 'account_id': settings.ACCOUNT_ID,
-#                 'short_description': '$' + request.GET.get('bounty', 0) + " bounty on " + issue['project'] + " issue #" + str(issue['number']),
-#                 'type': 'PERSONAL',
-#                 'amount': int(request.GET.get('bounty', 0)),
-#                 'mode': 'iframe'
-#                 }
-#                 wepay_call_return = wepay.call('/checkout/create', ctx)
-#                 checkout_uri = wepay_call_return['checkout_uri']
-#                 message = "Adding bounty to issue #" + str(issue['number'])
-#                 messages.add_message(request, messages.SUCCESS, message)
-#             except Exception, e:
-#                 message = "%s" % e
-
-#     else:
-#         if issue['status'] != "open":
-#             error = "Issue must be open, it is " + issue['status']
-#             messages.error(request, error)
-#         storage = messages.get_messages(request)
-#         for item in storage:
-#             message += str(item)
-
-#     context = {
-#         'message': message,
-#         'url': url,
-#         'issue': issue,
-#         'wepay_host': settings.DEBUG and "stage" or "www",
-#         'checkout_uri': checkout_uri,
-#         'balance': str(request.user.get_profile().balance),
-#     }
-
-#     if request.is_ajax():
-#         storage = messages.get_messages(request)
-#         for item in storage:
-#             message += str(item)
-#         return HttpResponse(json.dumps(context))
-
-#     q = request.GET.get('q', '')
-#     status = request.GET.get('status', 'open')
-#     order = request.GET.get('order', '-bounty')
-#     context['issues'] = get_issues(q, status, order)
-
-#     template = "index.html"
-
-#     return render_to_response(template, context, context_instance=RequestContext(request))
-
-
-# def wepay_auth(request):
-#     wepay = WePay(settings.IN_PRODUCTION)
-#     return redirect(wepay.get_authorization_url("http://" + Site.objects.get(id=settings.SITE_ID).domain + '/wepay_callback', settings.CLIENT_ID))
-
-
-# def wepay_callback(request):
-#     code = request.GET.get('code')
-#     wepay = WePay(settings.IN_PRODUCTION)
-#     response = wepay.get_token("http://" + Site.objects.get(id=settings.SITE_ID).domain + '/wepay_callback', settings.CLIENT_ID, settings.CLIENT_SECRET, code)
-#     messages.add_message(request, messages.SUCCESS, "Wepay token created !" + response['access_token'])
-#     return redirect("/")
-
-
-# def post_comment(request):
-#     issue = Issue.objects.get(number='34')
-#     create_comment(issue, "Is this still active????")
-#     return HttpResponse("True")
-
-
-# def normalize_query(query_string,
-#                     findterms=re.compile(r'"([^"]+)"|(\S+)').findall,
-#                     normspace=re.compile(r'\s{2,}').sub):
-#     return [normspace(' ', (t[0] or t[1]).strip()) for t in findterms(query_string)]
-
-
-# def get_query(query_string, search_fields):
-#     query = None
-#     terms = normalize_query(query_string)
-#     for term in terms:
-#         or_query = None
-#         for field_name in search_fields:
-#             q = Q(**{"%s__icontains" % field_name: term})
-#             if or_query is None:
-#                 or_query = q
-#             else:
-#                 or_query = or_query | q
-#         if query is None:
-#             query = or_query
-#         else:
-#             query = query & or_query
-#     return query
-
-
-
-
-# def join(request):
-#     if request.method == 'POST':
-#         if not request.POST.get('agree'):
-#             return HttpResponse()
-#         if request.is_ajax():
-#             #form = UserCreationForm(request.POST)
-
-#             if form.is_valid():
-#                 form.save()
-#                 user = authenticate(username=request.POST.get('username'), password=request.POST.get('password1'))
-#                 if user is not None:
-#                     if user.is_active:
-#                         user_profile = UserProfile(user=user)
-#                         user_profile.save()
-#                         login(request, user)
-#                         subject = "Welcome to Coder Bounty!"
-#                         body = "Thank you for joining Coder Bounty! Enjoy the site. http://coderbounty.com"
-#                         send_mail(subject, body, "Coder Bounty<" + settings.SERVER_EMAIL + ">", [request.POST.get('email')])
-#                         return render_to_response("login_bar.html", {}, context_instance=RequestContext(request))
-#                     else:
-#                         return HttpResponse()
-
-#     return HttpResponse()
-
-
-# def verify(request, service_slug):
-#     username = request.GET.get('username', False)
-#     verification_code = request.GET.get('verification_code', False)
-#     if username:
-#         service_name = ''.join(map(lambda s: s.capitalize() + " ", service_slug.split('-')))
-#         service = Service.objects.get(name=service_name)
-
-#         if verification_code:
-#             if request.session['random_string'] == verification_code:
-#                 user_service = UserService(user=request.user, service=service, username=username)
-#                 user_service.save()
-#                 return HttpResponse("Thanks for verifying your account. Happy coding!")
-#             else:
-#                 return HttpResponse("Please enter a valid verification code.")
-
-#         random_string = id_generator()
-#         request.session['random_string'] = random_string
-
-#         if service.name == "Bitbucket":
-#             cj = cookielib.CookieJar()
-#             opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-#             urllib2.install_opener(opener)
-
-#             url = urllib2.urlopen('https://bitbucket.org/account/signin/')
-#             html = url.read()
-#             doc = BeautifulSoup(html)
-#             csrf_input = doc.find(attrs=dict(name='csrfmiddlewaretoken'))
-#             csrf_token = csrf_input['value']
-
-#             params = urllib.urlencode(dict(username=settings.BITBUCKET_USERNAME,
-#                 password=settings.BITBUCKET_PASSWORD, csrfmiddlewaretoken=csrf_token, next='/', submit="Log in"))
-#             req = urllib2.Request('https://bitbucket.org/account/signin/', params)
-#             req.add_header('Referer', "https://bitbucket.org/account/signin/")
-#             url = urllib2.urlopen(req)
-
-#             url = urllib2.urlopen('https://bitbucket.org/account/notifications/send/?receiver=' + username)
-#             html = url.read()
-#             csrf_input = doc.find(attrs=dict(name='csrfmiddlewaretoken'))
-#             csrf_token = csrf_input['value']
-
-#             params = urllib.urlencode(dict(recipient=username, title="Coder Bounty " + service.name + " account verification code",
-#                 message="Your validation code is " + random_string, csrfmiddlewaretoken=csrf_token))
-#             req = urllib2.Request('https://bitbucket.org/account/notifications/send/', params)
-#             req.add_header('Referer', 'https://bitbucket.org/account/notifications/send/?receiver=' + username)
-#             url = urllib2.urlopen(req)
-
-#             return HttpResponse("I sent a code to your " + service.name + " account.  Please enter it above and click verify again.")
-
-#         else:
-#             if service.name == "Github":
-#                 url = urllib2.urlopen('https://github.com/' + username)
-#                 html = url.read()
-#                 doc = BeautifulSoup(html)
-#                 msg_button = doc.find('a', "email")
-#                 if msg_button:
-#                     encoded_email = msg_button['data-email']
-#                     decoded_email = urllib.unquote(encoded_email)
-#                 else:
-#                     return HttpResponse("Please add your email address to your public github profile for verification, you can remove it afterwards.")
-
-#             elif service.name == "Google Code":
-#                 decoded_email = username
-
-#             send_mail("Coder Bounty " + service.name + " account verification code", "Your validation code is " + random_string,
-#                 "Coder Bounty<" + settings.SERVER_EMAIL + ">", [decoded_email])
-#             return HttpResponse("I sent a code to your " + service.name + " email address.  Please enter it above and click verify again.")
-#     return HttpResponse("Please enter a username")
-
-
-# def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
-#     return ''.join(random.choice(chars) for x in range(size))
-
-
 def profile(request):
-    """Redirects to profile page if the requested user is loggedin
-    """ 
+    """Redirects to profile page if the requested user is loggedin"""
     try:
-        return redirect('/profile/'+request.user.username)
+        return redirect("/profile/" + request.user.username)
     except Exception:
-        return redirect('/')
+        return redirect("/")
 
 
 class UserProfileDetailView(DetailView):
     model = get_user_model()
     slug_field = "username"
     template_name = "profile.html"
+
+    def get(self, request, *args, **kwargs):
+        try:
+            self.object = self.get_object()
+        except Http404:
+            messages.error(self.request, "That user was not found.")
+            return redirect("/")
+        return super(UserProfileDetailView, self).get(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
         user = super(UserProfileDetailView, self).get_object(queryset)
@@ -415,51 +298,441 @@ class UserProfileDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(UserProfileDetailView, self).get_context_data(**kwargs)
-        context['activities'] = user_stream(self.get_object(), with_user_activity=True)        
+        context["activities"] = user_stream(self.get_object(), with_user_activity=True)
         return context
 
 
-class UserProfileEditView(UpdateView):
+class UserProfileEditView(SuccessMessageMixin, UpdateView):
     model = UserProfile
     form_class = UserProfileForm
     template_name = "profiles/edit.html"
+    success_message = "Profile saved"
 
     def get_object(self, queryset=None):
         return UserProfile.objects.get_or_create(user=self.request.user)[0]
 
     def get_success_url(self):
-        return reverse("profile", kwargs={'slug': self.request.user})
+        # return reverse("profile", kwargs={'slug': self.request.user})
+        return reverse("edit_profile")
+
+    def form_valid(self, form):
+        user_id = form.cleaned_data.get("user")
+        user = User.objects.get(id=user_id)
+        user.first_name = form.cleaned_data.get("first_name")
+        user.last_name = form.cleaned_data.get("last_name")
+        user.email = form.cleaned_data.get("email")
+        user.save()
+
+        return super(UserProfileEditView, self).form_valid(form)
+
+    def get_success_message(self, cleaned_data):
+        return self.success_message
 
 
-# def load_issue(request):
-#     if request.POST.get('issue[service]'):
-#         service = Service.objects.get(name=request.POST.get('issue[service]'))
-#         issue = Issue.objects.get(service=service, number=request.POST.get('issue[number]'), project=request.POST.get('issue[project]'))
-#         return render_to_response("single_issue.html", {'issue': issue}, context_instance=RequestContext(request))
-#     return HttpResponse()
+class PostAll(TemplateView):
+    template_name = "post_all.html"
+
+    def get_context_data(self, **kwargs):
+        # find all github issues
+        accounts = {}
+        for account in self.request.user.socialaccount_set.all().iterator():
+            providers = accounts.setdefault(account.provider, [])
+            providers.append(account)
+
+        try:
+            service = Service.objects.get(name="Github")
+        except Service.DoesNotExist:
+            raise Http404("That service was not found.")
+
+        try:
+            access_token = SocialToken.objects.get(
+                account__user=self.request.user, account__provider="github"
+            )
+        except Exception as e:
+            messages.error(self.request, str(e))
+            # return str(e) + 'Not implemented yet - https://github.com/CoderBounty/coderbounty/issues/16'
+
+        # the_url = service.api_url + "/" + accounts['github'][0].extra_data['login'] + "/user/issues"
+
+        # the_url = service.api_url + "/issues"
+        # print the_url
+
+        # resp = requests.get(the_url, params={'access_token': access_token}, headers={"content-type": 'application/vnd.github+json'})
+        # gres = resp.json()
+        # print gres
+
+        # the_url = service.api_url + "/user/issues?filter=all"
+
+        # the_url = 'https://api.github.com/user'
+
+        # /user/issues?filter=all
+
+        # resp = requests.get(the_url, params={'access_token': access_token})
+        # user_info = resp.json()
+
+        # resp = requests.get(user_info['repos_url'], params={'access_token': access_token})
+        # repos = resp.json()
+        # for repo in repos:
+        #   if repo['open_issues_count'] > 1:
+        #       print repo['name'], repo['open_issues_count']
+
+        # resp = requests.get(user_info['organizations_url'], params={'access_token': access_token})
+        # repos = resp.json()
+        # print repos
+        # for repo in repos:
+        #   if repo['open_issues_count'] > 1:
+        #       print repo['name'], repo['open_issues_count']
+
+        context = super(PostAll, self).get_context_data(**kwargs)
+        # context['leaderboard'] = leaderboard()
+        return context
 
 
-def help(request):
-    return render_to_response("help.html", context_instance=RequestContext(request))
+# @cache_page(432000) #5 days
+# class LeaderboardView(ListView):
+#     template_name = "leaderboard.html"
 
-def terms(request):
-    return render_to_response("terms.html", context_instance=RequestContext(request))
+#     def get_queryset(self):
+#         return User.objects.all().annotate(
+#             null_position=Count('userprofile__balance')).order_by(
+#             '-null_position', '-userprofile__balance', '-last_login')
 
-def about(request):
-    return render_to_response("about.html", context_instance=RequestContext(request))
+#     def get_context_data(self, **kwargs):
+#         context = super(LeaderboardView, self).get_context_data(**kwargs)
+#         context['leaderboard'] = leaderboard()
+#         return context
+
+
+class LeaderboardView(ListView):
+    model = User
+    paginate_by = 25
+    template_name = "leaderboard.html"
+
+    def get_queryset(self):
+        return (
+            User.objects.filter(payment__amount__gt=0)
+            .annotate(total=Sum("payment__amount"))
+            .order_by("-total")
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super(LeaderboardView, self).get_context_data(**kwargs)
+        leaderboard_users = (
+            User.objects.filter(payment__amount__gt=0)
+            .annotate(total=Sum("payment__amount"))
+            .order_by("-total")
+        )
+        paginator = Paginator(leaderboard_users, self.paginate_by)
+        page = self.request.GET.get("page")
+
+        try:
+            leaderboard_users_paginated = paginator.page(page)
+        except PageNotAnInteger:
+            leaderboard_users_paginated = paginator.page(1)
+        except EmptyPage:
+            leaderboard_users_paginated = paginator.page(paginator.num_pages)
+
+        context["leaderboard"] = leaderboard()
+        context["object_list"] = leaderboard_users_paginated
+        return context
+
+
+class PayView(DetailView):
+    model = Solution
+
+    def get(self, request, **kwargs):
+        try:
+            self.object = self.get_object()
+        except Http404:
+            messages.error(self.request, "That solution was not found.")
+            return redirect("/")
+
+        # temporarally until we add creator to issues
+        if Bounty.objects.filter(user=self.request.user).filter(
+            issue=self.object.issue
+        ):
+
+            import paypalrestsdk
+            import random
+            import string
+
+            paypalrestsdk.configure(
+                {
+                    "mode": settings.MODE,
+                    "client_id": settings.CLIENT_ID,
+                    "client_secret": settings.CLIENT_SECRET,
+                }
+            )
+            sender_batch_id = "".join(
+                random.choice(string.ascii_uppercase) for i in range(12)
+            )
+
+            payout = paypalrestsdk.Payout(
+                {
+                    "sender_batch_header": {
+                        "sender_batch_id": sender_batch_id,
+                        "email_subject": "You have a payment from Coderbounty",
+                    },
+                    "items": [
+                        {
+                            "recipient_type": "EMAIL",
+                            "amount": {
+                                "value": self.object.issue.bounty(),
+                                "currency": "USD",
+                            },
+                            "receiver": self.object.user.userprofile.payment_service_email,
+                            "note": "Thank you for your solution",
+                            "sender_item_id": str(self.object.issue),
+                        }
+                    ],
+                }
+            )
+
+            if payout.create(sync_mode=True):
+                messages.success(
+                    self.request,
+                    "payout[%s] created successfully"
+                    % (payout.batch_header.payout_batch_id),
+                )
+                self.object.status = Solution.PAID
+                self.object.save()
+                self.object.issue.winner = self.object.user
+                self.object.issue.status = Issue.PAID_STATUS
+                self.object.issue.paid = self.object.issue.bounty()
+                self.object.issue.save()
+                Payment.objects.create(
+                    issue=self.object.issue,
+                    solution=self.object,
+                    user=self.object.user,
+                    txn_id=payout.items.get("transaction_id"),
+                    amount=self.object.issue.bounty(),
+                    created=datetime.datetime.now(),
+                    modified=datetime.datetime.now(),
+                )
+
+            else:
+                messages.error(self.request, payout.error)
+
+        return redirect("/issue/" + str(self.object.issue.id))
+
 
 class IssueDetailView(DetailView):
     model = Issue
-    slug_field = "id"
+    # slug_field = "id"
     template_name = "issue.html"
+
+    def get(self, request, *args, **kwargs):
+        # try:
+        #     self.object = self.get_object()
+        # except:
+        #     messages.error(self.request, "That issue was not found.")
+        #     return redirect("/")
+
+        if self.request.GET.get("paymentId"):
+            import paypalrestsdk
+
+            paypalrestsdk.configure(
+                {
+                    "mode": settings.MODE,
+                    "client_id": settings.CLIENT_ID,
+                    "client_secret": settings.CLIENT_SECRET,
+                }
+            )
+
+            payment = paypalrestsdk.Payment.find(self.request.GET.get("paymentId"))
+
+            custom = payment.transactions[0].custom
+
+            if payment.execute({"payer_id": self.request.GET.get("PayerID")}):
+                send_mail(
+                    "Processed Payment PayerID"
+                    + self.request.GET.get("PayerID")
+                    + " paymentID"
+                    + self.request.GET.get("paymentId"),
+                    "payment occured",
+                    "support@coderbounty.com",
+                    ["support@coderbounty.com"],
+                    html_message="payment occured",
+                )
+                for obj in serializers.deserialize(
+                    "json", custom, ignorenonexistent=True
+                ):
+                    obj.object.created = datetime.datetime.now()
+                    obj.object.checkout_id = self.request.GET.get("checkout_id")
+                    obj.save()
+                    action.send(
+                        self.request.user,
+                        verb="placed a $" + str(obj.object.price) + " bounty on ",
+                        target=obj.object.issue,
+                    )
+                    post_to_slack(obj.object)
+                    if not settings.DEBUG:
+                        create_comment(obj.object.issue)
+            else:
+                messages.error(request, payment.error)
+                send_mail(
+                    "Payment error: PayerID"
+                    + self.request.GET.get("PayerID")
+                    + " paymentID"
+                    + self.request.GET.get("paymentId"),
+                    "payment error",
+                    "support@coderbounty.com",
+                    ["support@coderbounty.com"],
+                    html_message="payment error",
+                )
+
+        return super(IssueDetailView, self).get(request, *args, **kwargs)
+
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+        comment_service_helper = get_comment_helper(self.get_object().service)
+
+        comment_service_helper.load_comments(self.get_object())
+        if self.get_object().status in ("open", "in review"):
+            if self.get_object().get_api_data()["state"] == "closed":
+                issue = self.get_object()
+                if Solution.objects.filter(issue=issue):
+                    # process the payment here and mark it as paid if the solution was accepted
+                    issue.status = "in review"
+                else:
+                    issue.status = "closed"
+                issue.save()
+        if self.request.POST.get("take"):
+            if self.request.user.is_authenticated:
+                taker = Taker(issue=self.get_object(), user=self.request.user)
+                taker.save()
+                issue = self.get_object()
+                issue.status = "taken"
+                issue.save()
+                action.send(
+                    self.request.user, verb="has taken ", target=self.get_object()
+                )
+                msg_plain = render_to_string(
+                    "email/issue_taken.txt",
+                    {
+                        "user": self.request.user,
+                        "issue": self.get_object(),
+                        "time_remaining": taker.time_remaining,
+                    },
+                )
+                msg_html = render_to_string(
+                    "email/issue_taken.txt",
+                    {
+                        "user": self.request.user,
+                        "issue": self.get_object(),
+                        "time_remaining": taker.time_remaining,
+                    },
+                )
+
+                send_mail(
+                    "You have taken issue: "
+                    + self.get_object().project
+                    + " issue #"
+                    + str(self.get_object().number),
+                    msg_plain,
+                    "support@coderbounty.com",
+                    [self.request.user.email],
+                    html_message=msg_html,
+                )
+            else:
+                return redirect(
+                    "/accounts/login/?next=/issue/" + str(self.get_object().id)
+                )
+        if self.request.POST.get("solution"):
+            if self.get_object().status not in ("closed", "in review"):
+
+                if self.request.user.is_authenticated:
+                    solution = Solution(
+                        issue=self.get_object(),
+                        user=self.request.user,
+                        url=request.POST.get("solution"),
+                    )
+                    solution.save()
+                    issue = self.get_object()
+                    issue.status = "in review"
+                    issue.save()
+                    action.send(
+                        self.request.user,
+                        verb="posted ",
+                        action_object=solution,
+                        target=self.get_object(),
+                    )
+
+                    bounty_poster = Bounty.objects.filter(issue=self.get_object())[
+                        :1
+                    ].get()
+
+                    msg_plain = render_to_string(
+                        "email/solution_posted.txt",
+                        {"user": bounty_poster.user, "issue": self.get_object()},
+                    )
+                    msg_html = render_to_string(
+                        "email/solution_posted.txt",
+                        {"user": bounty_poster.user, "issue": self.get_object()},
+                    )
+
+                    send_mail(
+                        "Coderbounty solution posted on "
+                        + self.get_object().project
+                        + " issue #"
+                        + str(self.get_object().number),
+                        msg_plain,
+                        "support@coderbounty.com",
+                        [bounty_poster.user.email],
+                        html_message=msg_html,
+                    )
+
+                else:
+                    return redirect(
+                        "/accounts/login/?next=/issue/" + str(self.get_object().id)
+                    )
+
+        return super(IssueDetailView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(IssueDetailView, self).get_context_data(**kwargs)
-        context['leaderboard'] = leaderboard()        
+        context["leaderboard"] = leaderboard()
+        context["taker"] = self.get_object().get_taker()
+        context["takers"] = Taker.objects.filter(issue=self.get_object()).order_by(
+            "-created"
+        )
+        context["solutions"] = Solution.objects.filter(
+            issue=self.get_object()
+        ).order_by("-created")
+        if not context["taker"] and self.get_object().status == "taken":
+            issue = self.get_object()
+            issue.status = "open"
+            issue.save()
         return context
 
     def get_object(self):
-            object = super(IssueDetailView, self).get_object()
+        object = super(IssueDetailView, self).get_object()
+        if self.request.user.is_authenticated:
             object.views = object.views + 1
             object.save()
-            return object
+        return object
+
+
+def get_bounty_image(request, id):
+    try:
+        issue = Issue.objects.get(id=id)
+    except Issue.DoesNotExist:
+        raise Http404("That issue was not found.")
+
+    from PIL import Image
+    from PIL import ImageFont
+    from PIL import ImageDraw
+
+    size_map = {6: 510, 5: 515, 4: 525, 3: 530, 2: 533, 1: 533}
+    img = Image.open("coderbounty/static/images/layout/github-poster.png")
+    draw = ImageDraw.Draw(img)
+    font = ImageFont.truetype("coderbounty/static/fonts/regulators/regulators.ttf", 24)
+    draw.text(
+        (size_map[len(str(issue.bounty()))], 46),
+        "${:,}".format(issue.bounty()),
+        (163, 75, 51),
+        font=font,
+    )
+    response = HttpResponse(content_type="image/jpeg")
+    img.save(response, "JPEG")
+    return response

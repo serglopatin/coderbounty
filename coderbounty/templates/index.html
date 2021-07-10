@@ -1,106 +1,126 @@
 {% extends 'base.html' %}
-{% load staticfiles %}
+{% load static %}
 {% load i18n %}
 {% load socialaccount %}
 
 
 {% block content %}
-    <!-- Section - How it Works -->
-    <section class="section-howWorks wrapper-section">
-        <div class="wrapper-global">
-            <h1>Coders Wanted! Get Your Bounty Today!</h1>
-            <a href="/post">
-              <div style="height:325px; width:370px; float:left;">
-              </div>
+<!-- Section - How it Works -->
+<section class="section-howWorks wrapper-section">
+    <div class="wrapper-global">
+        <h1>Coders Wanted! Get Your Bounty Today!</h1>
+        <a href="/post">
+            <div style="height:325px; width:370px; float:left;" class="postImageHeader">
+            </div>
+        </a>
+        <a href="/list">
+            <div style="height:325px; width:439px; float:left;" class="codeImageheader">
+            </div>
+        </a>
+        <a href="/leaderboard">
+            <div style="height:325px; width:370px; float:left;" class="winImageHeader">
+            </div>
+        </a>
+        {% if not request.user.is_authenticated %}
+        <div class="btn-login-wrapper">
+            <a href="/accounts/login/">
+                <div class="btn-login">login</div>
             </a>
-            <a href="/list">
-              <div style="height:325px; width:439px; float:left;">
-              </div>
-            </a>
-            <a href="/leaderboard">
-              <div style="height:325px; width:370px; float:left;">
-              </div>
-            </a>
+            <div class="btn-login-social">
+                <a class="icon-google-plus2" href='{% provider_login_url "google" method="js_sdk" %}'></a>
+                <a class="icon-github6" href='{% provider_login_url "github" method="js_sdk" %}'></a>
+                <a class="icon-bitbucket2" href='{% provider_login_url "bitbucket" method="js_sdk" %}'></a>
+            </div>
+        </div>
+        {% endif %}
 
-            <div class="btn-login-wrapper">
-                <a href="/accounts/login/"><div class="btn-login">login</div></a>
-                <div class="btn-login-social">
-                    <a class="icon-google-plus2" href='{% provider_login_url "google" method="js_sdk" %}'></a>
-                    <a class="icon-github6" href='{% provider_login_url "github" method="js_sdk" %}'></a>
-                    <a class="icon-bitbucket2" href='{% provider_login_url "bitbucket" method="js_sdk" %}'></a>
+    </div>
+</section>
+<!-- Section Latest -->
+<div class="section-latest wrapper-section">
+    <div class="wrapper-global grid">
+        <section class="col-14 activity">
+            <!--frame -->
+            <div class="frame frame-light">
+                <div class="frame-content">
+                    <h2 class="titlebar"><span class="ribbon ribbon-normal ribbon-04 ribbon-brown">Recent
+                            Activity</span></h2>
+                    <!-- table-list-activity -->
+                    <table class="table-list table-list-activity">
+                        {% for activity in activities %}
+                        <tbody>
+                            <tr>
+                                <td class="thumb">
+                                    <a href="/profile/{{ activity.actor.username }}" class="img-holder"><img
+                                            src="{{ activity.actor.userprofile.avatar }}" alt="" /></a>
+                                </td>
+                                <td class="text">
+                                    <p>{% if activity.actor.get_absolute_url %}<a
+                                            href="{{ activity.actor.get_absolute_url }}">{{ activity.actor }}</a>
+                                        {% else %}<a href="{{ activity.actor_url }}">{{ activity.actor }}</a>{% endif %}
+                                        {{ activity.verb }}
+                                        {% if activity.action_object %}
+                                            {% if activity.action_object.get_absolute_url %}
+                                                <a href="{{ activity.action_object.get_absolute_url }}">
+                                                    {{ activity.action_object }}
+                                                </a>
+                                            {% else %}
+                                                <a href="{{ activity.action_object_url }}">
+                                                    {{ activity.action_object }}
+                                                </a>
+                                            {% endif %}
+                                        {% endif %}
+                                        {% if activity.action_object and activity.target %}to{% endif %}
+                                        {% if activity.target %}
+                                        {% if activity.target.get_absolute_url %}<a
+                                            href="{{ activity.target.get_absolute_url }}">{{ activity.target }}</a>
+                                        {% else %}<a href="{{ activity.target_url }}">{{ activity.target }}</a>
+                                        {% endif %}
+                                        {% endif %}{{ activity.timestamp|timesince }} {% trans "ago" %}</p>
+                                    <time class="time">{{ activity.timestamp|date:"m/d/Y" }}</time>
+                                </td>
+                                <td class="status">
+                                    {% if activity.verb == "signed up" %}
+                                    <span class="icon-custom_yes"></span>
+                                    {% elif "placed" in activity.verb %}
+                                    <span class="icon-custom_dolar"></span>
+                                    {% elif activity.verb == "posted" %}
+                                    <span class="icon-custom_idea"></span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                        </tbody>
+                        {% endfor %}
+                    </table>
                 </div>
             </div>
-
-        </div>
-    </section>
-    <!-- Section Latest -->
-    <div class="section-latest wrapper-section">
-        <div class="wrapper-global grid">
-            <section class="col-14 activity">
-                <!--frame -->
-                <div class="frame frame-light">
-                    <div class="frame-content">
-                        <h2 class="titlebar"><span class="ribbon ribbon-normal ribbon-04 ribbon-brown">Recent Activity</span></h2>
-                        <!-- table-list-activity -->
-                        <table class="table-list table-list-activity">
-                            {% for activity in activities %}
-                            <tbody>
-                                <tr>
-                                    <td class="thumb">
-                                        <a href="/profile/{{ activity.actor.username }}" class="img-holder"><img src="{{ activity.actor.userprofile.gravatar }}" alt="" /></a></td>
-                                    <td class="text">
-                                        <p>{% if activity.actor.get_absolute_url %}<a href="{{ activity.actor.get_absolute_url }}">{{ activity.actor }}</a>
-											{% else %}<a href="{{ activity.actor_url }}">{{ activity.actor }}</a>{% endif %}
-											{{ activity.verb }}
-											{% if activity.action_object %}
-											    {% if activity.action_object.get_absolute_url %}<a href="{{ activity.action_object.get_absolute_url }}">{{ activity.action_object }}</a>
-											    {% else %}<a href="{{ activity.action_object_url }}">{{ activity.action_object }}</a>{% endif %}
-											{% endif %}
-											{% if activity.action_object and activity.target %}to{% endif %}
-											{% if activity.target %}
-											    {% if activity.target.get_absolute_url %}<a href="{{ activity.target.get_absolute_url }}">{{ activity.target }}</a>
-											    {% else %}<a href="{{ activity.target_url }}">{{ activity.target }}</a>{% endif %}
-											{% endif %}{{ activity.timestamp|timesince }} {% trans "ago" %}</p>
-                                        <time class="time">{{ activity.timestamp|date:"m/d/Y" }}</time></td>
-                                    <td class="status">
-                                 {% if activity.verb == "signed up" %}
-                                     <span class="icon-custom_yes"></span>
-                                {% elif "placed" in activity.verb  %}
-                                    <span class="icon-custom_dolar"></span>
-                                {% elif activity.verb == "closed bounty" %}
-                                    <span class="icon-custom_idea"></span>
-                                {% endif %}
-                                    </td>
-                                </tr>
-                                
-                            </tbody>
+        </section>
+        <section class="col-6 leader-board">
+            <!--frame -->
+            <div class="frame frame-dark">
+                <div class="frame-content">
+                    <h2 class="titlebar"><span class="ribbon ribbon-normal ribbon-04 ribbon-brown-dark"><em
+                                class="icon-custom_star"></em>{% now "F" %} top 10</span></h2>
+                    <table class="table-list table-list-leader-board">
+                        <tbody>
+                            {% for leader in leaderboard %}
+                            <tr>
+                                <td class="thumb">
+                                    <a href="/profile/{{ leader.username }}" class="img-holder"><img
+                                            src="{{ leader.userprofile.avatar }}" alt="" /></a>
+                                </td>
+                                <td class="text">
+                                    <a href="/profile/{{ leader.username }}">{{ leader.username}}</a>
+                                </td>
+                                <td class="price">${{ leader.userprofile.bounties_won}}</td>
+                            </tr>
                             {% endfor %}
-                        </table>                        
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
-            </section>
-            <section class="col-6 leader-board">
-                <!--frame -->
-                <div class="frame frame-dark">
-                    <div class="frame-content">
-                        <h2 class="titlebar"><span class="ribbon ribbon-normal ribbon-04 ribbon-brown-dark"><em class="icon-custom_star"></em>Coder Leaderboard</span></h2>
-                        <table class="table-list table-list-leader-board">
-                            <tbody>
-                              {% for leader in leaderboard %}
-                                  <tr>
-                                      <td class="thumb">
-                                          <a href="/profile/{{ leader.username }}" class="img-holder"><img src="{{ leader.userprofile.gravatar }}" alt="" /></a></td>
-                                      <td class="text">
-                                          <a href="/profile/{{ leader.username }}">{{ leader.username}}</a>
-                                      </td>
-                                      <td class="price">${{ leader.userprofile.balance}}</td>
-                                  </tr>
-                              {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-        </div>
+            </div>
+        </section>
     </div>
+</div>
 {% endblock %}

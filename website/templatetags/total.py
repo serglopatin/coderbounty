@@ -1,10 +1,13 @@
-import datetime
 from django import template
-from website.models import UserProfile
+from website.models import Payment
 from django.db.models import Sum
 
 register = template.Library()
 
+
 @register.simple_tag
 def bounty_total():
-    return "{:,.0f}".format(UserProfile.objects.aggregate(Sum('balance'))['balance__sum'])
+    _total = Payment.objects.aggregate(Sum('amount'))['amount__sum']
+    if _total is None:
+        return "0"
+    return "{:,.0f}".format(_total)

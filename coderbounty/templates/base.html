@@ -1,72 +1,95 @@
-{% load staticfiles %}
+{% load static %}
 {% load total %}
 <!DOCTYPE html>
-<html class="no-js">
+<html>
+
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=1190" />
     <title>{% block title %}{% endblock %} Coderbounty - Post bounties on code issues</title>
     <!-- Meta Tags -->
+    {% block meta %}
+
     <meta name="description" content="">
+
+    {% endblock %}
     <!-- Favicon -->
-    <link rel="shortcut icon" type="image/x-icon" href="{{STATIC_URL}}images/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="{{STATIC_URL}}favicon.ico">
     <!-- CSS -->
-    <link rel="stylesheet" href="{% static "css/style.css" %}" />
-    <link rel="stylesheet" href="{% static "css/font.css" %}" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/font.css' %}" />
     <!-- Icons -->
-    <link rel="stylesheet" href="{% static "icons/coder-bounty/style.css" %}" />
+    <link rel="stylesheet" href="{% static 'icons/coder-bounty/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'icons/font-mfizz-2.2/font-mfizz.css' %}" />
     <!-- JS -->
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-    <script src="{% static "js/modernizr/modernizr.custom.js" %}"></script>
-    <script src="{% static "js/custom/custom-jQuery.js" %}"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="{% static 'js/modernizr/modernizr.custom.js' %}"></script>
+    <script src="{% static 'js/custom/custom-jQuery.js' %}"></script>
     <!--[if lt IE 9]>
         <script src="http://ie7-js.googlecode.com/svn/version/2.1(beta4)/IE9.js"></script>
-        <script type="text/javascript" src="{% static "js/selectivizr/selectivizr.js" %}"></script>
+        <script type="text/javascript" src="{% static 'js/selectivizr/selectivizr.js' %}"></script>
         <script>
             html5elements()
         </script>
     <![endif]-->
+    <script data-ad-client="ca-pub-6468204154139130" async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 </head>
+
 <body>
     <!-- Header -->
     <header class="header wrapper-section">
         <div class="wrapper-global">
             <!-- logo -->
             <a class="logo" href="/">
-                <img src="{% static "images/coder-bounty.png" %}" alt="Coder Bounty" />
+                <img src="{% static 'images/coder-bounty-logo.png' %}" alt="Coder Bounty" />
             </a>
             <!-- navigation -->
             <nav class="navHeader">
                 <ul>
-                    <li><a href="{% url 'about' %}">About</a></li>
-                    <li><a href="{% url 'help' %}">Help</a></li>
-                    <li><a href="http://coderbounty.uservoice.com" target="_new">Feedback</a></li>
+                    {% if request.user.is_authenticated %}
+                    <li><a href="/profile">{{request.user}} <i class='icon-cog'></i></a></li>
+
+                    <li><a href="/accounts/logout">Logout <i class='icon-exit'></i></a></li>
+                    {% else %}
+                    <li><a href="/accounts/login">Login <i class='icon-enter'></i></a></li>
+                    {% endif %}
+                    <li><a href="{% url 'post' %}">Post <i class='icon-hammer'></i></a></li>
+                    <li><a href="{% url 'list' %}">Bounties <i class='icon-custom_dolar'></i></a></li>
+                    <li><a href="{% url 'about' %}">About <i class='icon-question'></i> </a></li>
+                    <li><a href="{% url 'help' %}">Help <i class='icon-info'></i> </a></li>
                 </ul>
             </nav>
             <!-- header-social -->
             <div class="header-social">
                 <ul>
-                    <li><a class="twitter" href="https://twitter.com/coderbounty"></a></li>
-                    <li><a class="facebook" href="https://www.facebook.com/coderbounty"></a></li>
-                    <li><a class="rss" href="https://github.com/seanauriti/coderbounty/issues"></a></li>
+                    <li><a class="twitter" target="_blank" href="https://twitter.com/coderbounty"></a></li>
+                    <li><a class="facebook" target="_blank" href="https://www.facebook.com/coderbounty"></a></li>
                 </ul>
             </div>
-            {% if messages %}
-                <div class="element-newFeature">
-                    {% for message in messages %}
-                        <p>
-                            <strong {% if message.tags %} class="{{ message.tags }}"{% endif %}>
-                                {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
-                            </strong>
-                            {{ message }}
-                        </p>
-                    {% endfor %}
-                </div>
-            {% endif %}
+
             <!-- new feature -->
+            {% if messages %}
+            <div class="element-newFeature">
+                {% for message in messages %}
+                <p class="titlebar-paper">
+                    <strong {% if message.tags %} class="{{ message.tags }}" {% endif %}>
+                        {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                        New Feature: {% endif %}
+                    </strong>
+                    {{ message }}
+                </p>
+                {% endfor %}
+            </div>
+            {% endif %}
 
             <!-- road sign -->
             <div class="element-roadSign">
-                <p><span>${% bounty_total %}</span> in bounties won!</p>
+                {% if request.user.is_authenticated %}
+                <p><span>${{ request.user.userprofile.balance|default:"0" }}</span> account balance</p>
+                {% else %}
+                <p><span>${% bounty_total %}</span> in bounties won</p>
+                {% endif %}
             </div>
         </div>
     </header>
@@ -78,26 +101,47 @@
         <div class="footer-symbol"></div>
         <div class="copyrights">
             <div class="wrapper-global">
-                <p>© {% now "Y" %} CoderBounty, Inc. All Rights Reserved. <a href="/terms">Terms & Conditions</a></p>
-                <ul class="footer-social">
-                    <li><a class="twitter" href="https://twitter.com/coderbounty"></a></li>
-                    <li><a class="facebook" href="https://www.facebook.com/coderbounty"></a></li>
-                    <li><a class="rss" href="https://github.com/seanauriti/coderbounty/issues"></a></li>
+                <p>&copy; {% now "Y" %} CoderBounty, Inc. All Rights Reserved. <a href="/terms">Terms & Conditions</a>
+                </p>
+                <ul class="footer-links">
+                    <li><a href="https://github.com/CoderBounty/coderbounty/issues" target="_new">Feedback</a></li>
+                    <li><a href="{% url 'help' %}">FAQ</a></li>
+                    <li><a href="mailto:support@coderbounty.com">Email Us</a></li>
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/api">API</a></li>
+
                 </ul>
+                <ul class="footer-social">
+                    <li><a class="twitter" target="_blank" href="https://twitter.com/coderbounty"></a></li>
+                    <li><a class="facebook" target="_blank" href="https://www.facebook.com/coderbounty"></a></li>
+
+                </ul>
+
             </div>
         </div>
     </footer>
 
-    
+
     <script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date(); a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
 
-  ga('create', 'UA-66636003-1', 'auto');
-  ga('send', 'pageview');
+        ga('create', 'UA-66636003-1', 'auto');
+        ga('send', 'pageview');
 
+        var _mfq = _mfq || [];
+        (function () {
+            var mf = document.createElement("script");
+            mf.type = "text/javascript"; mf.async = true;
+            mf.src = "//cdn.mouseflow.com/projects/7bcd257b-de90-4462-a2b8-93a6f5a17792.js";
+            document.getElementsByTagName("head")[0].appendChild(mf);
+        })();
     </script>
+    
 </body>
+
 </html>

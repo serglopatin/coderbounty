@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<script src="{% static 'js/all.js' %}"></script>
+
+<div class="section-issues clearfix wrapper-global">
+    <div class="headbar frame listing">
+
+        <h1>Organisations</h1>
+
+        <table class="list-table-header">
+            <tbody>
+                <tr>
+                    <th class="list-table-header-org">Org</th>
+                    <th class="list-table-header-repo"># of repositories</th>
+                    <th class="list-table-header-totalbounty">Total bounty</th>
+                    <th class="list-table-header-updated">Updated</th>
+                    <th class="list-table-header-people">Top contributors</th>
+                </tr>
+            </tbody>
+        </table>
+        <hr class="list-hr">
+
+        <div class="organisation-list">
+            <section class="frame frame-light">
+                <div class="frame-content">
+                    <table class="organisation-list-table">
+                        <tbody>
+                            {% for organisation in organisations %}
+                            <tr class="organisation-list-row">
+                                <td class="list-table-org">
+                                    <img src="{{}}" class="list-table-image">
+                                </td>
+                                <td class="list-table-header-repo list-table-repo">{{}}</td>
+                                <td class="list-table-header-totalbounty list-table-totalbounty">{{}}</td>
+                                <td class="list-table-header-updated list-table-updated">{{}}</td>
+                                <td class="list-table-header-people list-table-people">
+                                    {% for contributor in contributors %}
+                                    <img src="{{}}" class="list-table-image">
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}

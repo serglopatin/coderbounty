@@ -1,0 +1,17 @@
+Hi {{user}}.
+
+Welcome to Coderbounty, the fun way to accelerate software development.
+
+Join us on slack: https://coderbounty-slackin.herokuapp.com/
+
+Follow us on twitter:http://twitter.com/coderbounty/
+
+Post a bounty!
+
+http://www.coderbounty.com/post/
+
+We hope you enjoy using the site and let us how it goes.
+
+Regards,
+
+The Coderbounty team.

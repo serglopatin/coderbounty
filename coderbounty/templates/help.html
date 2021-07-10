@@ -1,44 +1,41 @@
 {% extends "base.html" %}
-
 {% block content %}
 <style>
-p {margin-bottom:10px;}
+    p {margin-bottom:10px;}
 </style>
-    <div class="section-postBounty wrapper-section">
-        <div class="wrapper-global grid">
-            <div class="col-20">
-                <section class="frame frame-dark-paper">
-                    <span class="bugfix-top"></span>
-                    <div class="frame-content">
-                        <h1 class="titlebar-paper"><span>Help</span></h1>
-                       
-                            <div class="grid">
-                            <div style="padding:40px; color:black; ">
-
-                        <p><span style="color:#A34B33;font-weight:bold;">Q</span>: How do I use this site?</br>
-                            <span style="color:#D93600;font-weight:bold;">A</span>: First find an issue on any of the services we support, paste a link to it, and add a bounty.  Additionally you can add to existing bounties or if you are a coder you can complete the tasks and get the bounty!</p>
-                        <p><span style="color:#A34B33;font-weight:bold;">Q</span>: How long will the bounty remain on the issue?</br>
-                            <span style="color:#D93600;font-weight:bold;">A</span>: As long as you want.  You can request a refund within 60 days for a 3% fee, after that the bounty stays on the issue until it is closed.</p>
-                        <p><span style="color:#A34B33;font-weight:bold;">Q</span>: What does open mean?</br>
-                            <span style="color:#D93600;font-weight:bold;">A</span>: Open means that the issue has not been fixed, coders can commit their code and fix the issue.</p>
-                        <p><span style="color:#A34B33;font-weight:bold;">Q</span>: What does in review mean?</br>
-                            <span style="color:#D93600;font-weight:bold;">A</span>: In review means that the coder has committed a fix, and the issue reporter and bounty placers are reviewing the code.  Bounties can still be placed and when the issue remains closed for 3 days, the bounty is paid out to the coder who committed the code to close the issue.</p>
-                        <p><span style="color:#A34B33;font-weight:bold;">Q</span>: What does paid mean?</br>
-                            <span style="color:#D93600;font-weight:bold;">A</span>: Paid means that the issue has been fixed, was in review for 3 days and has been verified as closed.  Also, the bounty was paid to the coder who closed the issue.</p>
-                        <p><span style="color:#A34B33;font-weight:bold;">Q</span>: Can you integrate my bug tracker for my company?</br>
-                            <span style="color:#D93600;font-weight:bold;">A</span>: Yes! Let us know in the <a href="http://coderbounty.uservoice.com" target="_new">feedback area</a> or send an email to coderbounty at gmail.com</p>
-                        <p><span style="color:#A34B33;font-weight:bold;">Q</span>: I code, will I be guaranteed the bounty?</br>
-                            <span style="color:#D93600;font-weight:bold;">A</span>: Yes! Payment is collected up front and held in escrow.  When your code is approved you will receive a payment to your selected payment service.</p>
-                        <p><span style="color:#A34B33;font-weight:bold;">Q</span>: What does take mean?</br>
-                            <span style="color:#D93600;font-weight:bold;">A</span>: Take gives you exclusive rights to close the issue.  This issue will be blocked from anyone else taking it and you will have 24 hours to resolve the issue.</p>
-                                </div>
-                            </div>
+<div class="section-postBounty wrapper-section">
+    <div class="wrapper-global grid">
+        <div class="col-20">
+            <section class="frame frame-dark-paper">
+                <span class="bugfix-top"></span>
+                <div class="frame-content">
+                    <h1 class="titlebar-paper"><span>Help</span></h1>
+                    <div class="grid">
+                        <div style="padding:40px; color:black;">
+                            <p><span style="color:#A34B33;font-weight:bold;">Q</span>: How do I use this site?</br>
+                                <span style="color:#D93600;font-weight:bold;">A</span>: First find an issue on any of the services we support, paste a link to it, and add a bounty.  Additionally you can add to existing bounties or if you are a coder you can complete the tasks and get the bounty!</p>
+                            <p><span style="color:#A34B33;font-weight:bold;">Q</span>: How long will the bounty remain on the issue?</br>
+                                <span style="color:#D93600;font-weight:bold;">A</span>: As long as you want.  You can request a refund within 60 days for a 3% fee, after that the bounty stays on the issue until it is closed.</p>
+                            <p><span style="color:#A34B33;font-weight:bold;">Q</span>: What does open mean?</br>
+                                <span style="color:#D93600;font-weight:bold;">A</span>: Open means that the issue has not been fixed, coders can commit their code and fix the issue.</p>
+                            <p><span style="color:#A34B33;font-weight:bold;">Q</span>: What does in review mean?</br>
+                                <span style="color:#D93600;font-weight:bold;">A</span>: In review means that the coder has committed a fix, and the issue reporter and bounty placers are reviewing the code.  Bounties can still be placed and when the issue remains closed for 3 days, the bounty is paid out to the coder who committed the code to close the issue.</p>
+                            <p><span style="color:#A34B33;font-weight:bold;">Q</span>: What does paid mean?</br>
+                                <span style="color:#D93600;font-weight:bold;">A</span>: Paid means that the issue has been fixed, was in review for 3 days and has been verified as closed.  Also, the bounty was paid to the coder who closed the issue.</p>
+                            <p><span style="color:#A34B33;font-weight:bold;">Q</span>: Can you integrate my bug tracker for my company?</br>
+                                <span style="color:#D93600;font-weight:bold;">A</span>: Yes! Let us know by sending an email to coderbounty at gmail.com</p>
+                            <p><span style="color:#A34B33;font-weight:bold;">Q</span>: I code, will I be guaranteed the bounty?</br>
+                                <span style="color:#D93600;font-weight:bold;">A</span>: Yes! Payment is collected up front and held in escrow.  When your code is approved you will receive a payment to your selected payment service.</p>
+                            <p><span style="color:#A34B33;font-weight:bold;">Q</span>: What does take mean?</br>
+                                <span style="color:#D93600;font-weight:bold;">A</span>: Take gives you exclusive rights to close the issue.  This issue will be blocked from anyone else taking it and you will have 24 hours to resolve the issue.</p>
+                        </div>
                     </div>
-                    
-                </section>
-            </div>
+                </div>
+                <span class="bugfix-bottom"></span>
+            </section>
         </div>
     </div>
+</div>
 
 
 {% endblock content %}

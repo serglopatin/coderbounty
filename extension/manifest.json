@@ -1,0 +1,29 @@
+{
+  "manifest_version": 2,
+  "name": "Coderbounty",
+  "version": "0.2",
+  "content_scripts": [{
+    "matches": [
+      "https://github.com/*/*/issues/*"
+    ],
+    "css": ["style.css"],
+    "js": [
+      "content.js"
+    ]
+  }],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "permissions": [
+    "*://github.com/*/*/issues/*", "tabs", "webNavigation"
+  ],
+  "homepage_url": "http://coderbounty.com/",
+  "browser_action": {
+    "default_icon": {
+      "19": "logo19.png",
+      "64": "logo64.png",
+      "128": "logo128.png"
+    },
+    "default_title": "Coderbounty"
+  }
+}

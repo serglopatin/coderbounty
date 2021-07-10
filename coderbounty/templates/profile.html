@@ -1,74 +1,117 @@
 {% extends 'base.html' %}
-{% load staticfiles %}
+{% load static %}
+{% load socialaccount %}
+{% load i18n %}
+{% block title %}{{ object.get_username }} |{% endblock %}
 
 {% block content %}
-    <!-- Section - Profile -->
-	<div class="section-profile wrapper-section">
-		<div class="grid wrapper-global">
-			<!-- profile-info -->
-			<div class="col-5 profile-info">
-				<section class="frame frame-dark-paper">
-					<span class="bugfix-top"></span>
-					<div class="frame-content">
-                    	<a class="img-holder" href="#"><img src="{{ object.userprofile.gravatar_large }}" alt="" /></a>
-						<p>Joined {{ object.date_joined|date:"m/d/Y"}}</p>
-                        <ul class="social-list">
-                        {% for account in object.socialaccount_set.all %}
-							{% if account.provider == 'github' %}
-								<li><a href="{{account.extra_data.html_url }}" target="_new" class="icon-github6"></a></li>
-							{% endif %}
-							{% if account.provider == 'google' %}
-								<li><a href="{{account.extra_data.link }}" target="_new" class="icon-google-plus2"></a></li>
-							{% endif %}
-							{% if account.provider == 'bitbucket' %}
-								<li><a href="{{account.extra_data.link }}" target="_new" class="icon-bitbucket2"></a></li>
-							{% endif %}
-                        </ul>
-                        {% endfor %}
-                        <ul class="stats">
-                        	<li><span class="label">Won:</span><span class="value">${{object.userprofile.balance|default:"0"}}</span></li>
-                            <li><span class="label">Posted:</span><span class="value">$0</span></li>
-                            <li><span class="label">Taken:</span><span class="value">0</span></li>
-                            <li><span class="label">Closed:</span><span class="value">0</span></li>
-                        </ul>
-                        {% if object.username == user.username %}
-                        	<a href="/edit_profile/" class="ribbon ribbon-03 ribbon-type-01 ribbon-normal ribbon-brown-dark">Edit profile</a>
-						{% endif %}                        
-						<button class="ribbon ribbon-03 ribbon-type-01 ribbon-normal"><span></span>Invite</button>
-                        
-					</div>
-					<span class="bugfix-bottom"></span>
-				</section>
-			</div>
-			<!-- profile-activitys -->
-			<div class="col-15 profile-activity">
-            	<div class="heading">
-            		<h2>{{ object.get_username }}</h2>
-                	<p>Global Rank #48</p>
-                </div>
-				<section class="frame frame-light">
-					<div class="frame-content">
-                    	<h2 class="titlebar"><span class="ribbon ribbon-normal ribbon-04 ribbon-brown">Recent Activity</span></h2>
-                        <ul class="additional-links" style="margin-top:-15px;">
-                        	<li><a href="">Show issues I've posted</a></li>
-                            <!-- note: you can place also other additional links, if you do remove inline style for margin top -->
-                        </ul>
-                        <table class="table-list table-list-activity">
-                        	{% for activity in activities %}
-							<tbody>
-								<tr>
-									<td class="status">
-										<span class="icon-custom_yes"></span></td>
-									<td class="text">
-										<p>{{ activity }}</p>
-									</td>
+<!-- Section - Profile -->
+<div class="section-profile wrapper-section">
+	<div class="grid wrapper-global">
+		<!-- profile-info -->
+		<div class="col-5 profile-info">
+			<section class="frame frame-dark-paper">
+				<span class="bugfix-top"></span>
+				<div class="frame-content">
+					<a class="img-holder" href="#"><img src="{{ object.userprofile.avatar_large }}" alt="" /></a>
+					<p>Joined {{ object.date_joined|date:"m/d/Y"}}</p>
+					<ul class="social-list">
+						{% for account in object.socialaccount_set.all %}
+						{% if account.provider == 'github' %}
+						<li><a href="{{account.extra_data.html_url }}" target="_new" class="icon-github6"></a></li>
+						{% endif %}
+						{% if account.provider == 'google' %}
+						<li><a href="{{account.extra_data.link }}" target="_new" class="icon-google-plus2"></a></li>
+						{% endif %}
+						{% if account.provider == 'bitbucket' %}
+						<li><a href="{{account.extra_data.link }}" target="_new" class="icon-bitbucket2"></a></li>
+						{% endif %}
+						{% endfor %}
+					</ul>
+					<ul class="stats">
+						<li><span class="label">Won:</span><span
+								class="value">${{object.userprofile.bounties_won|default:"0"}}</span></li>
+						<li><span class="label">Posted:</span><span
+								class="value">${{object.userprofile.bounties_placed}}</span></li>
+						<li><span class="label">Taken:</span><span class="value">{{object.taker_set.all|length}}</span>
+						</li>
+						<li><span class="label">Solutions:</span><span
+								class="value">{{object.solution_set.all|length}}</span></li>
+					</ul>
+					{% if request.user.is_authenticated %}
+					{% if object.username == request.user.username %}
+					<a href="/edit_profile/"
+						class="ribbon ribbon-03 ribbon-type-01 ribbon-normal ribbon-brown-dark">Edit profile</a>
+					{% endif %}
+					{% endif %}
+					<!--
+					<button class="ribbon ribbon-03 ribbon-type-01 ribbon-normal"><span></span>Invite</button>
+					-->
+					{% get_social_accounts user as accounts %}
 
-                            </tbody>
-                            {% endfor %}
-                        </table>                               
-					</div>
-				</section>
+					{% if object.username == request.user.username %}
+					{% if not accounts.github.0 %}
+					<button class="ribbon ribbon-03 ribbon-type-01 ribbon-normal"
+						onclick=location.href='{% provider_login_url "github" process="connect" %}' ;>
+						<i class="icon-github6" style="font-size: 1.5em;"></i> Connect</button>
+					{% endif %}
+					{% endif %}
+
+				</div>
+				<span class="bugfix-bottom"></span>
+			</section>
+		</div>
+		<!-- profile-activitys -->
+		<div class="col-15 profile-activity">
+			<div class="heading">
+				<h2>{{ object.get_username }}</h2>
+				<p>Global Rank #48</p>
 			</div>
+			<section class="frame frame-light">
+				<div class="frame-content">
+					<h2 class="titlebar"><span class="ribbon ribbon-normal ribbon-04 ribbon-brown">Recent
+							Activity</span></h2>
+					<ul class="additional-links" style="margin-top:-15px;">
+						<!-- note: you can place also other additional links, if you do remove inline style for margin top -->
+					</ul>
+					<table class="table-list table-list-activity">
+						{% for activity in activities %}
+						<tbody>
+							<tr>
+								<td class="status">
+									<span class="icon-custom_yes"></span>
+								</td>
+								<td class="text">
+									<p>{% if activity.actor.get_absolute_url %}<a
+											href="{{ activity.actor.get_absolute_url }}">{{ activity.actor }}</a>
+										{% else %}<a href="{{ activity.actor_url }}">{{ activity.actor }}</a>{% endif %}
+										{{ activity.verb }}
+										{% if activity.action_object %}
+											{% if activity.action_object.get_absolute_url %}
+												<a href="{{ activity.action_object.get_absolute_url }}">
+													{{ activity.action_object }}
+												</a>
+											{% else %}
+												<a href="{{ activity.action_object_url }}">
+													{{ activity.action_object }}
+												</a>
+											{% endif %}
+										{% endif %}
+										{% if activity.action_object and activity.target %}to{% endif %}
+										{% if activity.target %}
+										{% if activity.target.get_absolute_url %}<a
+											href="{{ activity.target.get_absolute_url }}">{{ activity.target }}</a>
+										{% else %}<a href="{{ activity.target_url }}">{{ activity.target }}</a>
+										{% endif %}
+										{% endif %}{{ activity.timestamp|timesince }} {% trans "ago" %}</p>
+								</td>
+
+						</tbody>
+						{% endfor %}
+					</table>
+				</div>
+			</section>
 		</div>
 	</div>
+</div>
 {% endblock %}

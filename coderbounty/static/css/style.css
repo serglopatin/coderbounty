@@ -1,7 +1,7 @@
 /*
 =====================
  RESET ==============
-===================== 
+=====================
 */
 html,body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,abbr,address,cite,code,del,dfn,em,img,ins,kbd,q,samp,small,strong,sub,sup,var,b,i,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,figcaption,figure,footer,header,hgroup,menu,nav,section,summary,time,mark,audio,video{margin:0;padding:0;border:0;outline:0;}
 article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}
@@ -22,12 +22,12 @@ input,select{vertical-align:middle}
 /*
 =====================
  GENERAL ============
-===================== 
+=====================
 */
 
 html {
 	background:url('../images/layout/pattern-00.gif') repeat 0 0;}
-body {	
+body {
 	font:normal 15px/120% 'CalistoMtRegular',serif;
 	color:#675B4D;}
 a {
@@ -38,7 +38,7 @@ a:hover {
 h1, h2, h3 {
 	font-family:'RegulatorsRegular',serif;
 	line-height:120%;
-	font-weight:normal;	
+	font-weight:normal;
 	color:#75857B;
 	-webkit-text-stroke: 0.05px;}
 h1 {font-size:40px;}
@@ -66,7 +66,7 @@ em {
 /*
 =====================
  LAYOUT =============
-===================== 
+=====================
 */
 .wrapper-global {
 	width:1190px;
@@ -79,20 +79,30 @@ em {
 	background:url('../images/layout/pattern-header.gif') repeat-x center top;}
 .header .wrapper-global {
 	position: relative;
-    height:175px;}
+    height:210px;}
 .navHeader {
-	position:absolute;
-	top:12px;
-	right:110px;}
+  position: fixed;
+  top: 0px;
+  padding: 10px;
+  height: 40px;
+  background-color: #463527;
+  width: 200%;
+  margin-left: -20%;
+  z-index: 11;
+}
+.navHeader ul {
+  position: absolute;
+left: 25%;
+}
 .navHeader li {
 	display:inline;
 	text-transform:uppercase;
 	margin:0 5px;}
 .navHeader li,
 .navHeader li a {
-	color:#463527;
+	color:#fff;
 	text-decoration:none;
-	font-size:12px;}
+	font-size:14px;}
 .navHeader li a {
 	font-family:'CalistoMtBold',serif;}
 .navHeader li:before {
@@ -106,7 +116,8 @@ em {
 
 .header .header-social {
 	overflow:hidden;
-	position:absolute;
+	position:fixed;
+	z-index: 12;
 	right:0;
 	top:10px;}
 .header .header-social li {
@@ -127,7 +138,7 @@ em {
 
 .header .logo {
 	position:absolute;
-	top:25px;
+	top:45px;
 	left:0;}
 
 .footer {
@@ -140,7 +151,7 @@ em {
 	background:url('../images/layout/css-sprites.png') no-repeat center -450px;}
 .footer .copyrights {
 	background:url('../images/layout/pattern-05.png') repeat 0 0;
-	height:150px;
+	height:auto;
 	padding-top:50px;}
 .footer .footer-social {
 	overflow:hidden;
@@ -150,6 +161,17 @@ em {
 	display:inline-block;
 	*zoom:1;
 	*display:inline;}
+.footer .footer-links li {
+	display:inline;}
+
+.footer .footer-links li:first-child:before {
+	content:'';}
+.footer .footer-links li:before {
+	color:#A79C8B;
+	content:'|';
+	position:relative;
+	left:-1px;}
+
 .footer .footer-social a {
 	display:inline-block;
 	*zoom:1;
@@ -164,7 +186,7 @@ em {
 .footer .footer-social .facebook:hover {background-position:-380px -30px;}
 .footer .footer-social .twitter:hover {background-position:-350px -30px;}
 .footer .footer-social .rss:hover {background-position:-410px -30px;}
-	
+
 /* Elements */
 .element-newFeature {
 	display:block;
@@ -197,7 +219,7 @@ em {
 .element-roadSign span {
 	display:block;
 	color:#A34B33;
-	font-family:'RegulatorsRegular',serif;	
+	font-family:'RegulatorsRegular',serif;
 	font-size:30px;
 	margin-bottom:6px;
 	-webkit-text-stroke: 0.05px;}
@@ -215,7 +237,7 @@ em {
 	padding-bottom:10px;}
 .table-list a:hover {
 	text-decoration:underline;}
-	
+
 .table-list .thumb {
 	width:100px;
 	text-align:center;}
@@ -272,7 +294,7 @@ em {
 	border-color:#BFB8AD;}
 
 /* FRAME */
-.frame {	
+.frame {
 	position:relative;
 	padding:0;
 	border-radius:15px;}
@@ -281,7 +303,7 @@ em {
 	z-index:10;
 	min-height:100px;
 	padding:20px 0;}
-	
+
 .frame:before,
 .frame:after,
 .frame-content:before,
@@ -312,7 +334,7 @@ em {
 .frame-dark-paper .frame-content {
 	padding-top:30px;
 	padding-bottom:30px;}
-	
+
 /*fame-light*/
 .frame-light:before {
 	background-position:0 0;
@@ -412,7 +434,7 @@ em {
 	width:100%;}
 .frame .titlebar .ribbon {
 	min-width:270px;}
-	
+
 .frame .titlebar-paper {
 	position:absolute;
 	top:-30px;
@@ -430,6 +452,15 @@ em {
 	font-size:32px;
 	color:#A34B33;}
 
+.listing span {
+	margin-top:24px;
+	margin-bottom:10px;
+}
+
+.filter{
+	padding-top:96px;
+}
+
 /*frame frame-noLines*/
 .frame.frame-noLines .table-list {
 	margin-top: 15px;}
@@ -445,14 +476,14 @@ em {
 /*
 =====================
  GRID ===============
-===================== 
+=====================
 */
 .grid:before,
 .grid:after {
     content: " ";
     display: table;}
 .grid:after {clear: both;}
-.grid {*zoom: 1;}	
+.grid {*zoom: 1;}
 /* col */
 .grid [class^="col-"].col-center,
 .grid [class*=" col-"].col-center {
@@ -478,7 +509,7 @@ em {
 .grid > [class^="col-"]:last-child,
 .grid > [class*=" col-"]:last-child{
 	margin-right:0;}
-	
+
 .grid .col-1 {width:40px;}
 .grid .col-2 {width:100px;}
 .grid .col-3 {width:160px;}
@@ -567,9 +598,9 @@ em {
 /*
 =====================
  RIBBON =============
-===================== 
+=====================
 */
-.ribbon {	
+.ribbon {
 	background-color:#BA5A43;
 	color:#F3EFE4;
 	text-decoration:none;
@@ -582,12 +613,12 @@ em {
 	z-index:10;}
 a.ribbon,
 button.ribbon,
-inpyt[type="submit"].ribbon {
+input[type="submit"].ribbon {
 	cursor:pointer;
 	font-family:'RegulatorsRegular',serif !important;}
 a.ribbon.ribbon-type-01,
 button.ribbon.ribbon-type-01,
-inpyt[type="submit"].ribbon.ribbon-type-01 {
+input[type="submit"].ribbon.ribbon-type-01 {
 	font-family:'CalistoMtRegular',serif !important;
 	font-size:12px;}
 
@@ -605,7 +636,7 @@ inpyt[type="submit"].ribbon.ribbon-type-01 {
 	font-size:24px;
 	margin-left:23px;
 	margin-right:23px;}
-	
+
 .ribbon.ribbon-type-01 {
 	font-size:11px !important;}
 
@@ -632,8 +663,8 @@ button.ribbon:hover:before {
 	color:#000;}
 
 button.ribbon-normal::-moz-focus-inner,
-button.ribbon-large::-moz-focus-inner { 
-	margin-top:-1px; 
+button.ribbon-large::-moz-focus-inner {
+	margin-top:-1px;
 	margin-bottom: -1px;}
 
 .ribbon:after,
@@ -713,11 +744,12 @@ button.ribbon-large::-moz-focus-inner {
 /*
 =====================
  FORM ELEMENTS ======
-===================== 
+=====================
 */
 form input[type="text"],
 form input[type="email"],
 form input[type="number"],
+form input[type="password"],
 form select,
 form textarea {
 	border:solid 2px #B3A895;
@@ -732,6 +764,7 @@ form textarea {
 form input[type="text"]:focus,
 form input[type="email"]:focus,
 form input[type="number"]:focus,
+form input[type="password"]:focus,
 form select:focus,
 form textarea:focus {
 	border-color:#75857B;
@@ -785,6 +818,10 @@ form .custom-radiobutton input:checked:before {
 	left:2px;
 	border-radius:4px;}
 
+form .errorlist {
+	color: red;
+	margin-bottom: 20px;
+}
 .form-layout {}
 .form-item:before,
 .form-item:after {
@@ -833,11 +870,11 @@ form .custom-radiobutton input:checked:before {
 /*
 =====================
  SECTIONS ===========
-===================== 
+=====================
 */
 /* Section howWorks */
 .section-howWorks {
-	background:url('../images/layout/bg-how-it-works.gif') repeat-x center -3px;}
+	background:url('../images/layout/bg-how-it-works.png') repeat-x center -3px;}
 .section-howWorks .wrapper-global {
 	height:432px;
 	padding-top:30px;
@@ -907,7 +944,7 @@ form .custom-radiobutton input:checked:before {
 	margin-top:4px;}
 .section-latest .leader-board .frame-dark .titlebar {
 	top:-22px;}
-	
+
 /* Section - Post Bounty */
 .section-postBounty {
 	padding-top:70px;
@@ -915,7 +952,7 @@ form .custom-radiobutton input:checked:before {
 .section-postBounty .bounty-post {
 	padding-left:30px;
 	padding-top:45px;}
-	
+
 .section-postBounty .bounty-post .label {
 	text-align:right;
 	width:110px;
@@ -925,7 +962,7 @@ form .custom-radiobutton input:checked:before {
 	margin-right:5px;}
 .section-postBounty .bounty-post .value .custom-radiobutton {
 	margin-left:10px;}
-	
+
 .section-postBounty .bounty-post input[type="text"],
 .section-postBounty .bounty-post textarea {
 	width:660px;}
@@ -946,7 +983,7 @@ form .custom-radiobutton input:checked:before {
 	color:#463527;
 	margin-bottom:15px;}
 .section-postBounty .bounty-info h2 a {
-	display:block;	
+	display:block;
 	color:#A34B33;
 	font-size:15px;
 	text-decoration:underline;}
@@ -1042,7 +1079,7 @@ form .custom-radiobutton input:checked:before {
 
 .section-issues .headbar {
 	text-align:center;
-	margin-bottom:30px;}
+	margin-bottom:100px;}
 .section-issues .headbar h2 {
 	font-family:'AdamantcRegular',serif;
 	text-transform:uppercase;
@@ -1104,19 +1141,31 @@ form .custom-radiobutton input:checked:before {
 	position:relative;}
 .issues .issue-status {
 	position:absolute;
-	right:-14px;
+	right:17px;
 	top:-10px;
 	width:24px;
 	height:24px;
-	font-size:24px;}
-.issues .issue-status .icon-custom_yes {color:#89A594;}
+	font-size:24px;
+    z-index: 11;}
+.issues .issue-status .icon-banknote {color:#89A594;}
+.issues .issue-status .icon-clock {color:#C9816F;}
+.issues .issue-status .icon-trophy {color:#D3C9B9;}
+
+p.desc {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 100%;
+    word-break: break-word;
+    height:71px;
+}
+
 .issues .issue-id {
 	font-family:'CalistoMtBold',serif;
 	color:#A34B33;
 	font-size:17px;
 	line-height:100%;
 	margin-bottom:8px;
-	padding-right:20px;}
+	padding-right:14px;}
 .issues .issue-id li {
 	display:inline;
 	padding:0 4px;}
@@ -1130,10 +1179,16 @@ form .custom-radiobutton input:checked:before {
 .issues .issue-id li:first-child:before {
 	content:'';}
 .issues .text h3 {
-	font-family:'CalistoMtBold',serif;
-	font-size:16px;
-	color:#463527;
-	margin-bottom:5px;}
+	font-family: 'CalistoMtBold',serif;
+    	font-size: 16px;
+    	color: #463527;
+    	margin-bottom: 5px;
+    	overflow: hidden;
+    	height:75px;
+    	}
+.issues .text h3:hover {
+    	white-space: normal;
+    	overflow: overlay;}
 .issues .text > p {
 	font-size:14px;}
 .issues .logo-tech {
@@ -1143,8 +1198,11 @@ form .custom-radiobutton input:checked:before {
 	max-width:100px;
 	display:block;}
 .issues .posted {
-	font-size:14px;}
-
+	font-size: 14px;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
 .issues .issue-people {
 	padding-top:12px;
 	padding-left:20px;
@@ -1188,7 +1246,7 @@ form .custom-radiobutton input:checked:before {
 	height:165px;
 	overflow:hidden;
 	border:solid 2px #94856E;
-	background-color:#fff;	
+	background-color:#fff;
 	text-align:center;
 	margin-bottom:5px;}
 .section-profile .profile-info .img-holder img {
@@ -1369,13 +1427,13 @@ form .custom-radiobutton input:checked:before {
 .codeIssue-head .status li.id strong {
 	color:#A34B33;}
 
-.codeIssue-head .status li [class^="icon-"], 
+.codeIssue-head .status li [class^="icon-"],
 .codeIssue-head .status li [class*=" icon-"] {
 	color:#4D6F59;
 	text-transform: uppercase;}
-.codeIssue-head .status li [class^="icon-"] span, 
+.codeIssue-head .status li [class^="icon-"] span,
 .codeIssue-head .status li [class*=" icon-"] span {
-	padding-left: 3x;
+	padding-left: 3px;
 	font-size: 13px;}
 
 .codeIssue-basic {
@@ -1455,7 +1513,7 @@ form .custom-radiobutton input:checked:before {
 	text-decoration: none;}
 
 .item-comment {
-	margin-top: 25px;} 
+	margin-top: 25px;}
 .item-comment .img-holder {
 	position: absolute;
 	left: 0;
@@ -1504,3 +1562,252 @@ form .custom-radiobutton input:checked:before {
 	color:#3F3328;}
 .actionbar li a:hover strong {
 	text-decoration: none;}
+.profile-edit{
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+}
+button.edit-profile{
+	margin-left: 5%;
+}
+span#email-help-text{
+	font-size: 0.8em;
+}
+
+
+/*
+=====================
+ LOGIN PAGE==========
+=====================
+*/
+.section-login {
+	padding-top:70px;
+	padding-bottom:50px;
+}
+
+.section-login .login-grid {
+	color: black;
+	margin: 40px auto;
+	width: 450px;
+}
+.section-login .login-grid .login-intro {
+	margin-bottom: 20px;
+	text-align: center;
+}
+.section-login .login-grid .socialaccount_ballot {
+	margin: 20px 0;
+}
+.section-login .login-grid .socialaccount_providers {
+	overflow: hidden;
+}
+.section-login .login-grid .socialaccount_providers li {
+	float: left;
+	padding: 0;
+	text-align: center;
+	height: 35px;
+	width: 33%;
+}
+.section-login .login-grid .login-or {
+	margin-top: 10px;
+	text-align: center;
+}
+
+.socialaccount_provider {
+	display: inline-block;
+	height: 100%;
+    overflow: hidden;
+	text-indent: 100%;
+    white-space: nowrap;
+	width: 100%;
+}
+.socialaccount_provider.bitbucket {
+	background: url('../images/logos/logo-bitbucket.png') no-repeat center center;
+}
+.socialaccount_provider.github {
+	background: url('../images/logos/logo-github.png') no-repeat center center;
+}
+.socialaccount_provider.google {
+	background: url('../images/logos/logo-google.png') no-repeat center center;
+}
+.section-login .form-login {
+}
+.section-login .form-login input[type="text"],
+.section-login .form-login input[type="email"],
+.section-login .form-login input[type="password"] {
+	margin-bottom: 5px;
+	padding: 10px;
+	width: 100%;
+}
+.section-login .form-login input[type="text"],
+.section-login .form-login input[type="email"],
+.section-login .form-login input[type="password"]{
+	margin-bottom: 20px;
+}
+
+
+.section-login .secondaryAction {
+	float: right;
+    position: relative;
+    top: -19px;
+}
+.section-login .btn-login-wrapper {
+	bottom: 0;
+	float: left;
+	position: relative;
+}
+.section-login .btn-login-wrapper .btn-login {
+	background: url('../images/layout/css-sprites.png') no-repeat -775px 0px;
+	cursor: pointer;
+	outline: none;
+	width: 190px;
+}
+.section-login .btn-login-wrapper .btn-login:hover {
+	background-position: -775px -53px;
+}
+
+.taker_time{
+	font-size:12px;
+	color:#A34B33;
+	display: block;
+	float:right;
+	margin-left:7px;
+	top:3px;
+}
+.signup input[type="text"], .signup input[type="email"], .signup input[type="number"], .signup input[type="password"], .signup select, .signup textarea{
+	width: 100% !important;
+	padding: 10px !important;
+}
+
+#id_username{
+	width: 100% !important;
+}
+
+/*
+=====================
+ HEADER STYLES ======
+=====================
+*/
+
+.codeImageheader:hover {
+    background-image: url(../images/layout/codeSelected.png);
+    background-repeat: no-repeat;
+    background-position-x: 85px;
+    background-position-y: 13px;
+}
+
+.postImageHeader:hover {
+    background-image: url(../images/layout/postSelected.png);
+    background-repeat: no-repeat;
+    background-position-x: 13px;
+    background-position-y: 13px;
+}
+
+
+
+.winImageHeader:hover {
+    background-image: url(../images/layout/winSelected.png);
+    background-repeat: no-repeat;
+    background-position-x: 88px;
+    background-position-y: 13px;
+}
+
+
+/*
+=====================
+ LIST==========
+=====================
+*/
+
+.left{float:left;margin-right:8em;}
+.list{height:10em;}
+.list-filter-buttons{margin-top:40px;}
+.list-view{margin-bottom:30px;}
+.inline{display:inline-block;}
+.list-table-header{margin-top:60px;}
+.list-hr{width:95%;border-width:2px;}
+.list-table{margin-top:0px;margin-left:-10px;}
+.list-image{padding:2em;}
+.list-people{width:150px;height:60px;float:left;margin-top:0px;}
+.take{margin-left:20px;}
+.list-table-header-user-org{padding-left:50px;padding-right:10px;}
+.list-table-header-issue{padding-left:50px;padding-right:10px;}
+.list-table-header-title{padding-left:50px;padding-right:10px;}
+.list-table-header-status{padding-left:50px;padding-right:10px;}
+.list-table-header-views,.list-table-header-people,.list-table-header-bounty
+{padding-left: 50px;padding-right:10px;}
+.list-table-owner{width:130px;}
+.list-table-issue{padding-left:15px;width:110px;}
+.list-table-title{width:235px;}
+.list-table-status{padding-left:20px;width:105px;}
+.list-table-bounty{width:110px;}
+.list-table-views{padding-left:10px;width:95px;}
+
+
+/*
+===========================
+ ORGANISATION======
+===========================
+*/
+.list-table-header{margin-top:3%; margin-left: 5%; width: 90%;}
+.list-table-header-org,.list-table-header-totalbounty,.list-table-header-repo{width:15%;}
+.list-table-header-updated{width: 20%;}
+.list-table-header-languages{width: 20%;}
+/* .list-table-header-people{width:35%;} */
+.organisation-list-table{width: 100%;margin-left: 3%;}
+.organisation-list-row{height: 30px; width: 100%;}
+.list-table-org{padding-left: 2%;}
+.list-table-image{height: 30px; width: auto;}
+.list-table-repo{padding-right: 2%;}
+.list-table-totalbounty{padding-right: 4%;}
+.list-table-updated{padding-right: 5%;}
+.list-table-people{padding-right: 10%;}
+.list-table-languages{padding-right: 7%;}
+
+
+/*
+=============================
+ REPOSITORY LIST======
+=============================
+*/
+.list-table-header{margin-top:3%; width: 90%;}
+.list-table-header-repository,.list-table-header-issues{width:10%;}
+/* .list-table-header-bounty{width: 12%; padding-left: 0;} */
+.list-table-header-languages{width: 15%;}
+.list-table-header-coverage{width: 13%;}
+.list-table-header-contributors{width:19%;padding-right: 3%}
+.organisation-list-table{width: 90%;margin: 0 5% 0 5%;}
+.organisation-list-row{height: 30px; width: 100%;}
+.organisation-list-row td{text-align: center;}
+.list-table-repository{width:7%;}
+.list-table-issues{width:8%;}
+.list-table-bounty{width: 8%;}
+.list-table-repo-languages{width: 13%;}
+.list-table-coverage{width: 8%;}
+.list-table-contributors{width:15%;}
+
+
+/*
+===============================
+ REPOSITORY GRID======
+===============================
+*/
+.repo-headbar{margin-bottom: 3em !important;}
+.repo-info{margin-left: 5%; margin-top: -10px;margin-bottom: 10px;}
+.repo-name{font-weight: bold; margin-bottom: 0.5em;}
+.repo-item{border-style: none; height: 210px !important;}
+.below-image{padding: 0;margin-left: 10px;font-size: 12px;text-align: left;}
+.side-info{width: 30%; display: inline-block; text-align: center;margin-top: 0;}
+.repository-image{width: 96px;height: 96px;}
+.repo-people{margin-top: 5px;}
+.repo-grid-people-image{width: 30px; height: 30px;}
+.bounty-price{font-family:'RegulatorsRegular',serif; color:#75857B;font-size:24px;}
+.repo-bounty{font-size: 18px; margin-left: 5px;}
+.repo-text-info{margin-left:5%; display: inline-block; text-align: center; width: 60%;}
+.repo-text-info p{font-size: 13px;}
+.repo-issues{margin-top: 0.5em;}
+.repo-issues-table{text-align: center;}
+.repo-issues-table td{font-size: 13px;}
+.repo-issues-td{padding: 0 0.7em 0 0.7em;}
+.repo-commit{text-align: left; margin-top: 0.5em;}
+.commit-info{margin-bottom: 5px;}
+.repo-stats i{margin-left: 1em; font-size: 13px;}
